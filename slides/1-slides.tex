@@ -1,0 +1,142 @@
+\begin{frame}[fragile]\frametitle{JSON}
+  \begin{itemize}
+    \item JavaScript Object Notation
+    \item Data types:
+      null, boolean, number, string, array, object
+    \item {\bfseries Tree structure}: branches are either objects or arrays
+      \begin{itemize}
+        \item Object keys are strings
+        \item Array keys are indices
+      \end{itemize}
+    \item No comments
+  \end{itemize}
+\begin{lstlisting}[language=json]
+{
+    "key": [
+        null, true, false, 42, 1.41, "string"
+    ]
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\texorpdfstring{\ttfamily nlohmann/json}{nlohmann/json}}
+  \begin{itemize}
+    % \setlength\itemsep{1.5em}
+    \item {\footnotesize\url{https://github.com/nlohmann/json}}
+    \item {\footnotesize\url{https://json.nlohmann.me/api/basic_json/}}
+    \item Development started in 2013
+    \item Header-only library
+    \item By default, uses standard library containers to represent JSON values
+    \item Tries to mimic access patterns of the standard library
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\texorpdfstring{\ttfamily nlohmann/json}{nlohmann/json}}
+\begin{minipage}{\textwidth}
+\renewcommand{\baselinestretch}{0.7}
+\setmonofont{DejaVu Sans Mono}[Scale=0.6]
+\begin{lstlisting}
+namespace @Nnlohmann@ {
+
+template <
+    template <typename @bTU@, typename @bTV@, typename... @bTArgs@> class @bTObjectType@ = std::@Tmap@,
+    template <typename @bTU@, typename... @bTArgs@> class @bTArrayType@ = std::@Tvector@,
+    class @bTStringType@ = std::@Tstring@,
+    class @bTBooleanType@ = bool,
+    class @bTNumberIntegerType@ = std::int64_t,
+    class @bTNumberUnsignedType@ = std::uint64_t,
+    class @bTNumberFloatType@ = double,
+    template <typename @bTU@> class @bTAllocatorType@ = std::@Tallocator@,
+    template <typename @bTT@, typename @bTSFINAE@ = void> class @bTJSONSerializer@ = @Tadl_serializer@,
+    class @bTBinaryType@ = std::@Tvector@<std::uint8_t>,
+    class @bTCustomBaseClass@ = void
+>
+class @Tbasic_json@;
+
+using @Tjson@ = @Tbasic_json@<>;
+using @Tordered_json@ = @Tbasic_json@<@Tordered_map@>;
+
+template <class @bTKey@, class @bTT@>
+struct @Tordered_map@ : std::@Tvector@<std::@Tpair@<const @bTKey@, @bTT@>>;
+
+} // namespace nlohmann
+\end{lstlisting}
+\end{minipage}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Parsing}
+  \begin{itemize}
+    \item \lstinline{@Tbasic_json@     @Tbasic_json@::@Fparse@();} \\
+      {\scriptsize\url{https://json.nlohmann.me/api/basic_json/parse/}}
+      \begin{itemize}
+        \item \lstinline{auto j = @Tjson@::@Fparse@(std::@Tifstream@("/opt/data.json"));}
+        \item \lstinline{auto j = @Tjson@::@Fparse@("[ 1, 2, null ]");}
+      \end{itemize}
+    \item \lstinline{std::@Tistream@& operator@F>>@(std::@Tistream@&, @Tbasic_json@&);} \\
+      {\scriptsize\url{https://json.nlohmann.me/api/operator_gtgt/}}
+      \vspace{-6pt}
+      \begin{itemize}
+        \item \begin{lstlisting}
+@Tjson@ j;
+std::@Tifstream@("/opt/data.json") >> j;
+        \end{lstlisting}
+      \end{itemize}
+      \vspace{-8pt}
+    \item \lstinline{bool @Tbasic_json@::@Faccept@();} \\
+      {\scriptsize\url{https://json.nlohmann.me/api/basic_json/accept/}}
+      \begin{itemize}
+        \item Accepts same types as \lstinline{@Fparse@()}
+        \item Only checks if the input is valid JSON
+      \end{itemize}
+    \item \lstinline{@Tjson@   operator @L""_json@(const char*, std::size_t);} \\
+      {\scriptsize\url{https://json.nlohmann.me/api/operator_literal_json/}}
+      \begin{itemize}
+        \item \lstinline{auto j = "[ 1, 2, null ]"@L_json@;}
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Emitting}
+  \begin{itemize}
+    \item \lstinline{@Tstring_t@    @Tbasic_json@::@Fdump@()} \\
+      {\scriptsize\url{https://json.nlohmann.me/api/basic_json/dump/}}
+      \begin{itemize}
+        \item \lstinline{auto j = @Tjson@::@Fparse@("[ 1, 2, null ]");}
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Getting and setting values}
+  \begin{itemize}
+    \item .
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Exceptions}
+  \begin{itemize}
+    \item {\footnotesize\url{https://json.nlohmann.me/api/basic_json/exception/}}
+    \item \lstinline{@Nnlohmann@::@Tbasic_json@::@Texception@;}
+    \item \lstinline{class @Texception@ : public std::@Texception@;}
+    \item Subclasses:
+    \begin{itemize}
+      \item \lstinline{@Tparse_error@}
+        for exceptions indicating a parse error
+      \item \lstinline{@Tinvalid_iterator@}
+        for exceptions indicating errors with iterators
+      \item \lstinline{@Ttype_error@}
+        for exceptions indicating executing a member function with a wrong type
+      \item \lstinline{@Tout_of_range@}
+        for exceptions indicating access out of the defined range
+      \item \lstinline{@Tother_error@}
+        for exceptions indicating other library errors
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{(De)serializing user types}
+  \begin{itemize}
+    \item Specialize \lstinline{adl_serializer}
+  \end{itemize}
+\end{frame}

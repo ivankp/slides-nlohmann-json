@@ -1,0 +1,312 @@
+\documentclass[
+  lualatex,
+  hyperref={
+    hyperfootnotes=false,
+    linktoc=all,
+    colorlinks=true,
+    linkcolor=link,
+    citecolor=link,
+    urlcolor=blue
+  }
+]{beamer}
+
+\usepackage{iftex}
+\RequireLuaTeX
+
+\usepackage{fontspec}
+\setsansfont{Roboto}[
+  Path = fonts/Roboto/ ,
+  Extension = .ttf ,
+  UprightFont = *-Regular ,
+  ItalicFont = *-Italic ,
+  BoldFont = *-Bold ,
+  BoldItalicFont = *-BoldItalic ,
+  FontFace = {l}{n}{*-Light},
+  FontFace = {l}{it}{*-LightItalic},
+  FontFace = {sb}{n}{*-Medium},
+  FontFace = {sb}{it}{*-MediumItalic},
+  FontFace = {eb}{n}{*-Black},
+  FontFace = {eb}{it}{*-BlackItalic}
+]
+
+\setmonofont[Scale=0.95]{DejaVu Sans Mono}
+
+% Fake small caps
+% https://tex.stackexchange.com/a/225078/35990
+\newcommand\fauxsc[1]{\fauxschelper#1 \relax\relax}
+\def\fauxschelper#1 #2\relax{%
+  \fauxschelphelp#1\relax\relax%
+  \if\relax#2\relax\else\ \fauxschelper#2\relax\fi%
+}
+\def\Hscale{.83}\def\Vscale{.72}\def\Cscale{1.00}
+\def\fauxschelphelp#1#2\relax{%
+  \ifnum`#1>``\ifnum`#1<`\{\scalebox{\Hscale}[\Vscale]{\uppercase{#1}}\else%
+    \scalebox{\Cscale}[1]{#1}\fi\else\scalebox{\Cscale}[1]{#1}\fi%
+  \ifx\relax#2\relax\else\fauxschelphelp#2\relax\fi}
+
+\usepackage{color}
+\definecolor{text}{HTML}{000000}
+\definecolor{ara1}{HTML}{003376}
+\definecolor{ara2}{HTML}{DE5700}
+\definecolor{link}{HTML}{0000FF}
+
+\definecolor{beamerblue}{rgb}{0.2,0.2,0.7}
+\definecolor{darkred}{HTML}{D90000}
+
+\setbeamercolor{frametitle}{fg=ara1}
+\setbeamercolor{palette primary}{fg=ara2}
+\setbeamercolor{palette secondary}{fg=ara2}
+\setbeamercolor{palette tertiary}{fg=ara2}
+\setbeamercolor{palette quaternary}{fg=ara2}
+\setbeamercolor{caption name}{fg=text}
+
+\setbeamercolor{normal text}{fg=text}
+\usebeamercolor[fg]{normal text}
+
+% \usepackage{enumitem}
+
+\usepackage{tcolorbox}
+\tcbset{%
+  left=0em,right=0em,top=0em,bottom=0em,
+  colback=white,colframe=ara2,
+  baseline=2mm,
+  fontupper=\linespread{.90}\selectfont,
+  tikznode={align=left}
+}
+
+\usepackage[absolute,overlay]{textpos}
+\TPGrid{100}{100}
+
+\graphicspath{{fig/}}
+
+% Listings ---------------------------------------------------------------------
+\definecolor{lstType}{HTML}{0B7A03}
+\definecolor{lstKeyword}{HTML}{BF5908}
+\definecolor{lstLiteral}{HTML}{990055}
+\definecolor{lstNamespace}{HTML}{555555}
+\definecolor{lstFunction}{HTML}{0077AA}
+\definecolor{lstComment}{HTML}{708090}
+
+\usepackage{listings}
+\lstset{
+    xleftmargin=\parindent,
+%
+    upquote=true,
+%
+    escapeinside={@!}{@},
+%
+    moredelim=[is][\color{lstType}]{@T}{@},
+    moredelim=[is][\bfseries\color{lstType}]{@bT}{@},
+    moredelim=[is][\color{lstKeyword}]{@K}{@},
+    moredelim=[is][\color{lstLiteral}]{@L}{@},
+    moredelim=[is][\color{lstNamespace}]{@N}{@},
+    moredelim=[is][\color{lstFunction}]{@F}{@},
+%
+    basicstyle={\ttfamily},
+%
+    morecomment=[l]{//}, % l is for line comment
+    morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+    commentstyle={\itshape\color{lstComment}},
+%
+    morestring=[b]", % "string"
+    morestring=[b]', % 'c'
+    morestring=[s]{R"(}{)"}, % R"(raw string)"
+    stringstyle=\color{lstLiteral},
+    showstringspaces=false,
+%
+    morekeywords=[0]{
+alignas, alignof, and, and_eq, asm, bitand, bitor, break, case, catch, class, co_await, co_return,
+co_yield, compl, concept, const, const_cast, consteval, constexpr, constinit, continue,
+contract_assert, decltype, default, delete, do, dynamic_cast, else, enum, explicit, export, extern,
+for, friend, goto, if, inline, mutable, namespace, new, noexcept, not, not_eq, operator, or, or_eq,
+private, protected, public, reflexpr, register, reinterpret_cast, requires, return, sizeof, static,
+static_assert, static_cast, struct, switch, synchronized, template, this, thread_local, throw, try,
+typedef, typeid, typename, union, using, virtual, volatile, while, xor, xor_eq
+    },
+    keywordstyle=[0]\color{lstKeyword},
+%
+    morekeywords=[1]{
+auto, void, bool, char, int, short, long, signed, unsigned, float, double,
+int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t,
+size_t
+},
+    keywordstyle=[1]\color{lstType},
+%
+    literate=
+      {::}{{{\color{lstNamespace}{::}}}}{2}
+      {std::}{{{\color{lstNamespace}{std::}}}}{5}
+}
+
+\lstdefinelanguage{json}{
+    basicstyle={\ttfamily},
+    upquote=true,
+    showstringspaces=false,
+    literate=
+      {:}{{{\color{ara2}{:}}}}{1}
+      {,}{{{\color{ara2}{,}}}}{1}
+      {\{}{{{\color{ara1}{\{}}}}{1}
+      {\}}{{{\color{ara1}{\}}}}}{1}
+      {[}{{{\color{ara1}{[}}}}{1}
+      {]}{{{\color{ara1}{]}}}}{1},
+}
+
+% \makeatletter
+% \newif\if@mylstfirstline
+% \lst@AddToHook{PreInit}{%
+%   \lst@ifdisplaystyle%
+%     \@mylstfirstlinetrue%
+%   \fi%
+% }
+% \lst@AddToHook{EOL}{%
+%   \lst@ifdisplaystyle%
+%     \if@mylstfirstline%
+%       \refstepcounter{lstlisting}%
+%       \ifx\lst@label\@empty\else \label{\lst@label}\fi%
+%       \hfill{\color{lstComment}[\thelstlisting]}%
+%       \@mylstfirstlinefalse%
+%     \fi%
+%   \fi%
+% }
+% \makeatother
+
+% Fixes ------------------------------------------------------------------------
+% \let\Tiny=\tiny
+
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+\WarningFilter{latexfont}{}
+
+% Slide styles -----------------------------------------------------------------
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=1em,text margin right=1em}
+\linespread{1.2}
+% \setstretch{1.2}
+
+\setlength{\leftmargini}{0.7em}
+\setlength{\leftmarginii}{1em}
+
+\setbeamertemplate{itemize item}{\color{ara2}%
+  \raisebox{\dimexpr(\fontcharht\font`o-\height+\depth)/2\relax}{$\bullet$}%
+}
+\setbeamertemplate{itemize subitem}{\color{ara2}%
+  \raisebox{\dimexpr(\fontcharht\font`o-\height+\depth)/2\relax}{$\circ$}%
+}
+\setbeamertemplate{itemize subsubitem}{\color{ara2}\bf--}
+
+\makeatletter
+\newlength\beamerleftmargin
+\setlength\beamerleftmargin{\Gm@lmargin}
+\newlength\beamerrightmargin
+\setlength\beamerrightmargin{\Gm@rmargin}
+\makeatother
+
+\NewDocumentEnvironment{margins}
+{O{-\beamerleftmargin}O{-\beamerrightmargin}}
+{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+{\endlist}
+
+\setbeamertemplate{title page}{% Title slide layout
+  \vspace{2em}
+
+  {\centering \huge\fontseries{sb}\selectfont
+    \color[HTML]{003376}{\inserttitle}\\
+  }\vspace{1em}
+
+  {\centering \Large
+    \color[HTML]{0092CA}{\insertsubtitle}\\
+  }\vspace{4em}
+
+  {\centering \Large
+    \insertauthor\\
+  }\vspace{1em}
+
+  {\centering
+    \insertdate\\
+  }\vspace{-1em}
+}
+
+\setbeamertemplate{frametitle}{% regular slide template
+  \vspace*{1pt}%
+  \hspace*{\dimexpr-\beamerleftmargin+0.5em\relax}%
+  \fontseries{sb}\selectfont\insertframetitle
+}
+
+\makeatletter
+\newlength\footthird
+\setlength\footthird{\dimexpr(\paperwidth)/3\relax}
+\makeatother
+
+\newcommand\slidenum{\insertframenumber/\inserttotalframenumber}
+\setbeamertemplate{footline}[text line]{%
+  \hspace*{\dimexpr-\beamerleftmargin\relax}%
+  \begin{minipage}[b]{\paperwidth}%
+  \begin{minipage}[b]{\footthird}%
+    \color{ara1}%
+    \hspace{2pt}%
+    \inserttitle
+  \end{minipage}%
+  \begin{minipage}[b]{\footthird}%
+    \color{ara1}%
+    \centering%
+    \insertauthor
+  \end{minipage}%
+  \begin{minipage}[b]{\footthird}%
+    \color{ara1}%
+    \hfill%
+    \insertdate%
+    \begin{minipage}[b]{4em}%
+      \hfill%
+      \slidenum%
+      \hspace{2pt}
+    \end{minipage}%
+  \end{minipage}%
+  \vspace{1.5pt}%
+  \end{minipage}%
+}
+
+% Title, Authors, Date **********************************************
+\title{\texorpdfstring{\ttfamily nlohmann/json}{nlohmann/json}}
+\subtitle{JSON for Modern C++}
+\author{Ivan Pogrebnyak}
+% \date{\today}
+\date{April 21, 2026}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+{ \setbeamertemplate{footline}{}
+  \begin{frame}
+    \setcounter{framenumber}{0}
+    \titlepage
+  \end{frame}
+}
+
+\directlua{require "scripts/add_slides.lua"}
+\directlua{add_slides()}
+
+% *******************************************************************
+\newcounter{finalframe}
+\setcounter{finalframe}{\value{framenumber}}
+\renewcommand\slidenum{\insertframenumber}
+\section*{Backup}
+\directlua{add_slides("b")}
+
+% BIBLIOGRAPHY ------------------------------------------------------
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+% \setbeamercolor{bibliography item}{parent=palette primary}
+% \setbeamercolor*{bibliography entry title}{parent=palette primary}
+\setbeamercolor*{bibliography entry author}{fg=text}
+\setbeamercolor*{bibliography entry note}{fg=text}
+\setbeamercolor*{bibliography item}{fg=text}
+
+% \begin{frame}[allowframebreaks]{References}
+%   \vspace{-0.5em}
+%   \renewcommand*{\bibfont}{\tiny}
+%   % \sloppy
+%   \printbibliography
+% \end{frame}
+
+\setcounter{framenumber}{\value{finalframe}}
+\end{document}
+
