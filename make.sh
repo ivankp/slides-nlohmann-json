@@ -5,7 +5,7 @@ TEX=(lualatex -interaction=batchmode -shell-escape)
 BIB=(biber --nolog -m 99)
 # -m 99 suppresses cross references that are not directly cited
 
-DEP=(slides/*)
+DEP=()
 
 NAME=''
 if [ -z "$NAME" ]; then
