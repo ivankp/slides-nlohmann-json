@@ -1,0 +1,467 @@
+\listfiles
+\documentclass{slides}
+\usepackage[screen,includeheadfoot,left=1em,right=1em,top=0.5em,bottom=0.2em]{geometry}
+
+\usepackage{iftex}
+\RequireLuaTeX
+
+% \usepackage{fontspec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fontawesome}
+\usepackage[
+  hyperfootnotes=false,
+  pdfpagelabels=false,
+  linktoc=all,
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=cern80,
+  pdfusetitle,
+  pdfsubject={},
+  pdfkeywords={}
+]{hyperref}
+
+% Fonts ------------------------------------------------------------------------
+\setsansfont{Roboto}[
+  Path = fonts/Roboto/,
+  Extension = .ttf,
+  UprightFont = *-Regular,
+  ItalicFont = *-Italic,
+  BoldFont = *-Bold,
+  BoldItalicFont = *-BoldItalic,
+  FontFace = {l}{n}{*-Light},
+  FontFace = {l}{it}{*-LightItalic},
+  FontFace = {sb}{n}{*-Medium},
+  FontFace = {sb}{it}{*-MediumItalic},
+  FontFace = {eb}{n}{*-Black},
+  FontFace = {eb}{it}{*-BlackItalic}
+]
+
+\setmonofont[Scale=0.95]{DejaVu Sans Mono}
+
+\NewDocumentCommand\F{mO{#1}}{\fontsize{#1}{#2}\selectfont}
+
+% Colors -----------------------------------------------------------------------
+\definecolor{cern}{HTML}{0033A0}
+\definecolor{cern80}{HTML}{385CB4}
+
+\definecolor{araBlue}{HTML}{003376}
+\definecolor{araBlue2}{HTML}{0092CA}
+\definecolor{araOrange}{HTML}{DE5700}
+
+% Itemize, Enumerate -----------------------------------------------------------
+\setlist{
+    topsep=0pt,
+    parsep=0em,
+    partopsep=0pt,
+    itemsep=0pt,
+    leftmargin=1em
+}
+
+\setlist[1]{itemsep=1em}
+\setlist[2]{topsep=0.25em, itemsep=0.25em, before=\F{18pt}[24pt]}
+
+\setlist[itemize,1]{label={\color{araOrange}$\bullet$}}
+\setlist[itemize,2]{label={\color{araOrange}$\circ$}}
+\setlist[itemize,3]{label={\color{araOrange}\bfseries --}}
+
+% Listings ---------------------------------------------------------------------
+\definecolor{lstType}{HTML}{0B7A03}
+\definecolor{lstKeyword}{HTML}{BF5908}
+\definecolor{lstLiteral}{HTML}{990055}
+\definecolor{lstNamespace}{HTML}{555555}
+\definecolor{lstFunction}{HTML}{0077AA}
+\definecolor{lstComment}{HTML}{708090}
+\definecolor{lstPreproc}{HTML}{98BF10} % F06090
+
+\lstset{
+  aboveskip=0pt,
+  belowskip=0pt,
+%
+  xleftmargin=\parindent,
+%
+  upquote=true,
+%
+  escapeinside={@!}{@},
+%
+  moredelim=[is][\color{lstType}]{@T}{@},
+  moredelim=[is][\bfseries\color{lstType}]{@bT}{@},
+  moredelim=[is][\color{lstKeyword}]{@K}{@},
+  moredelim=[is][\color{lstLiteral}]{@L}{@},
+  moredelim=[is][\color{lstNamespace}]{@N}{@},
+  moredelim=[is][\color{lstFunction}]{@F}{@},
+  moredelim=[is][\color{lstPreproc}]{@P}{@},
+% moredelim=[l][\color{lstPreproc}]{\#},
+%
+  basicstyle={\ttfamily},
+%
+  morecomment=[l]{//}, % l is for line comment
+  morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+  commentstyle={\itshape\color{lstComment}},
+%
+  morestring=[b]", % "string"
+  morestring=[b]', % 'c'
+  morestring=[s]{R"(}{)"}, % R"(raw string)"
+  stringstyle=\color{lstLiteral},
+  showstringspaces=false,
+%
+  morekeywords=[0]{
+alignas, alignof, and, and_eq, asm, bitand, bitor, break, case, catch, class, co_await, co_return,
+co_yield, compl, concept, const, const_cast, consteval, constexpr, constinit, continue,
+contract_assert, decltype, default, delete, do, dynamic_cast, else, enum, explicit, export, extern,
+for, friend, goto, if, inline, mutable, namespace, new, noexcept, not, not_eq, operator, or, or_eq,
+private, protected, public, reflexpr, register, reinterpret_cast, requires, return, sizeof, static,
+static_assert, static_cast, struct, switch, synchronized, template, this, thread_local, throw, try,
+typedef, typeid, typename, union, using, virtual, volatile, while, xor, xor_eq
+  },
+  keywordstyle=[0]\color{lstKeyword},
+%
+  morekeywords=[1]{
+auto, void, bool, char, int, short, long, signed, unsigned, float, double,
+int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t,
+size_t
+},
+  keywordstyle=[1]\color{lstType},
+%
+  morekeywords=[2]{
+true, false
+},
+  keywordstyle=[2]\color{lstLiteral},
+%
+  literate=
+    {::}{{{\color{lstNamespace}{::}}}}{2}
+    {std::}{{{\color{lstNamespace}{std::}}}}{5}
+}
+
+\lstdefinelanguage{json}{
+  basicstyle={\ttfamily\color{lstLiteral}},
+  upquote=true,
+  showstringspaces=false,
+  literate=
+    {:}{{{\color{lstNamespace}{:}}}}{1}
+    {,}{{{\color{lstNamespace}{,}}}}{1}
+    {\{}{{{\color{lstNamespace}{\{}}}}{1}
+    {\}}{{{\color{lstNamespace}{\}}}}}{1}
+    {[}{{{\color{lstNamespace}{[}}}}{1}
+    {]}{{{\color{lstNamespace}{]}}}}{1},
+}
+
+% Headers and Footers ----------------------------------------------------------
+\fancyhf{} % Clear all default header and footer fields
+
+\makeatletter
+\newcommand{\@slidetitle}{}
+\newcommand{\slidetitle}[1]{\renewcommand{\@slidetitle}{#1}}
+\providecommand{\lastpage}{2}
+
+\lhead{\fontseries{sb}\selectfont\Large\color{araBlue}\@slidetitle}
+\lfoot{\F{11pt}\color{araBlue}\@title}
+\cfoot{\F{11pt}\color{araBlue}\@author}
+\rfoot{\F{11pt}\color{araBlue}\@date
+  \begin{minipage}[b]{4em}%
+    \hfill%
+    \F{14pt}\thepage/\lastpage
+    \hspace{5pt}
+  \end{minipage}%
+}
+\makeatother
+
+\fancyfootoffset{1em}
+
+% Title, Authors, Date *********************************************************
+\title{\texorpdfstring{\ttfamily nlohmann/json}{nlohmann/json}}
+\author{Ivan Pogrebnyak}
+\date{\today}
+% \date{April 21, 2026}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\thispagestyle{empty}
+\makeatletter
+{\centering \huge \color{araBlue} \@title \par}
+{\centering \Large \color{araBlue2} {JSON for Modern C++} \par}
+{\centering \Large \@author \par}
+{\centering \@date \par}
+\makeatother
+\pagebreak
+\pagestyle{fancy}
+
+% ------------------------------------------------------------------------------
+\slidetitle{JSON}
+
+\begin{itemize}
+\item JavaScript Object Notation
+\item Data types:
+  null, boolean, number, string, array, object
+\item {\bfseries Tree structure}: branches are either objects or arrays
+  \begin{itemize}
+    \item Object keys are strings
+    \item Array keys are indices
+  \end{itemize}
+\item No comments
+\end{itemize}
+
+\vspace{1em}
+\begin{lstlisting}[language=json]
+{
+    "key": [
+        null, true, false, 42, 1.41, "string"
+    ]
+}
+\end{lstlisting}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{\lstinline{nlohmann/json}}
+
+\begin{itemize}
+  \item \faGithub\ \ \url{https://github.com/nlohmann/json}
+  \item \faFileTextO\ \ \url{https://json.nlohmann.me/api/basic_json/}
+  \begin{itemize}
+    \item \faFileTextO\ \ in the slides links to documentation
+  \end{itemize}
+  \item Developed since 2013
+  \item Header-only library
+  \item Uses standard library containers to represent JSON values
+  \begin{itemize}
+    \item This is configurable via \lstinline{basic_json} template parameters
+  \end{itemize}
+  \item Tries to mimic access patterns of the standard library
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{\ttfamily nlohmann/json}
+
+{\F{12pt}[16pt]
+\begin{lstlisting}
+namespace @Nnlohmann@ {
+
+template <
+    template <typename @bTU@, typename @bTV@, typename... @bTArgs@> class @bTObjectType@ = std::@Tmap@,
+    template <typename @bTU@, typename... @bTArgs@> class @bTArrayType@ = std::@Tvector@,
+    class @bTStringType@ = std::@Tstring@,
+    class @bTBooleanType@ = bool,
+    class @bTNumberIntegerType@ = std::int64_t,
+    class @bTNumberUnsignedType@ = std::uint64_t,
+    class @bTNumberFloatType@ = double,
+    template <typename @bTU@> class @bTAllocatorType@ = std::@Tallocator@,
+    template <typename @bTT@, typename @bTSFINAE@ = void> class @bTJSONSerializer@ = @Tadl_serializer@,
+    class @bTBinaryType@ = std::@Tvector@<std::uint8_t>,
+    class @bTCustomBaseClass@ = void
+>
+class @Tbasic_json@;
+
+using @Tjson@ = @Tbasic_json@<>;
+using @Tordered_json@ = @Tbasic_json@<@Tordered_map@>;
+
+template <class @bTKey@, class @bTT@>
+struct @Tordered_map@ : std::@Tvector@<std::@Tpair@<const @bTKey@, @bTT@>>;
+
+} // namespace nlohmann
+\end{lstlisting}
+}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Parsing}
+
+\begin{itemize}[itemsep=0.6em, before=\F{18pt}]
+  \item \begin{lstlisting}
+static @Tbasic_json@
+@Tbasic_json@::@Fparse@(); @!{\hfill
+      \href{https://json.nlohmann.me/api/basic_json/parse/}{\faFileTextO}}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item \begin{lstlisting}
+@Tjson@ j = @Tjson@::@Fparse@(std::@Tifstream@("/opt/data.json"));
+        \end{lstlisting}
+
+      \item \begin{lstlisting}
+@Tjson@ j = @Tjson@::@Fparse@(R"({ "key": "value" })");
+        \end{lstlisting}
+    \end{itemize}
+
+  \item \begin{lstlisting}
+std::@Tistream@&
+operator>>(std::@Tistream@&, @Tbasic_json@&); @!\hfill
+      \href{https://json.nlohmann.me/api/operator_gtgt/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item \begin{lstlisting}
+@Tjson@ j;
+std::@Tifstream@("/opt/data.json") >> j;
+        \end{lstlisting}
+    \end{itemize}
+
+  \item \begin{lstlisting}
+static bool
+@Tbasic_json@::@Faccept@(); @!\hfill
+      \href{https://json.nlohmann.me/api/basic_json/accept/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item Accepts same types as \lstinline{@Fparse@()}
+      \item Only checks if the input is valid JSON
+    \end{itemize}
+
+  \item \begin{lstlisting}
+@Tjson@
+operator @L""_json@(const char*, std::size_t); @!\hfill
+      \href{https://json.nlohmann.me/api/operator_literal_json/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item \begin{lstlisting}
+using namespace nlohmann::literals;
+        \end{lstlisting}
+
+      \item \begin{lstlisting}
+@Tjson@ j = R"({ "key": "value" })"@L_json@;
+        \end{lstlisting}
+    \end{itemize}
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Emitting}
+
+\begin{itemize}
+  \item \begin{lstlisting}
+@Tbasic_json@::@Tstring_t@
+@Tbasic_json@::@Fdump@() const; @!\hfill
+      \href{https://json.nlohmann.me/api/basic_json/dump/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item \begin{lstlisting}
+@Tjson@ j;
+std::string str = j.@Fdump()@;
+        \end{lstlisting}
+      \item Non-static member function
+      \item Writes to a string
+    \end{itemize}
+
+  \item \begin{lstlisting}
+std::@Tistream@&
+operator<<(std::@Tistream@&, const @Tbasic_json@&); @!\hfill
+      \href{https://json.nlohmann.me/api/operator_ltlt/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item \begin{lstlisting}
+@Tjson@ j;
+std::@Tofstream@("/opt/data.json") << j;
+        \end{lstlisting}
+      \item Can write directly to an output file
+    \end{itemize}
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Getting and setting values}
+
+\begin{itemize}
+  \item .
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Exceptions}
+
+\begin{itemize}
+  \item \begin{lstlisting}
+@Nnlohmann@::@Tbasic_json@::@Texception@; @!\hfill
+      \href{https://json.nlohmann.me/api/basic_json/exception/}{\faFileTextO}@
+    \end{lstlisting}
+  \item \lstinline{class @Texception@ : public std::@Texception@;}
+  \item Subclasses:
+  \begin{itemize}
+    \item \lstinline{@Tparse_error@}
+      for exceptions indicating a parse error
+    \item \lstinline{@Tinvalid_iterator@}
+      for exceptions indicating errors with iterators
+    \item \lstinline{@Ttype_error@}
+      for exceptions indicating executing a member function with a wrong type
+    \item \lstinline{@Tout_of_range@}
+      for exceptions indicating access out of the defined range
+    \item \lstinline{@Tother_error@}
+      for exceptions indicating other library errors
+  \end{itemize}
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Exceptions examples}
+
+\begin{lstlisting}
+const @Tjson@ j = R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@L_json@;
+\end{lstlisting}
+
+\begin{itemize}
+  \item \begin{lstlisting}
+j.@Fat@("b")
+    \end{lstlisting}
+    \begin{itemize}
+      \item \color{red}\verb|[json.exception.out_of_range.403]| \\
+        \verb|key 'b' not found|
+    \end{itemize}
+
+  \item \begin{lstlisting}
+j.@Fat@("a").@Fget@<int>()
+    \end{lstlisting}
+    \begin{itemize}
+      \item \color{red}\verb|[json.exception.type_error.302]| \\
+        \verb|type must be number, but is string|
+    \end{itemize}
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{\lstinline{JSON_DIAGNOSTICS}}
+
+\begin{lstlisting}
+@P#define@ JSON_DIAGNOSTICS @L1@ @!\hfill
+      \href{https://json.nlohmann.me/api/macros/json_diagnostics/}{\faFileTextO}@
+@P#include@ <nlohmann/json.hpp>
+
+const @Tjson@ j = R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ @!\color{lstNamespace}\{@ "b"@!\color{lstNamespace}:@ 1 @!\color{lstNamespace}\}@ @!\color{lstNamespace}\}@)"@L_json@;
+\end{lstlisting}
+
+\begin{itemize}[itemsep=0.3em]
+  \item \begin{lstlisting}
+j.@Fat@("a").@Fat@("c")
+    \end{lstlisting}
+    \begin{itemize}
+      \item \color{red}\verb|[json.exception.out_of_range.403]| \\
+        \verb|(/a) key 'c' not found|
+    \end{itemize}
+
+  \item \begin{lstlisting}
+j.@Fat@("a").@Fget@<int>()
+    \end{lstlisting}
+    \begin{itemize}
+      \item \color{red}\verb|[json.exception.type_error.302]| \\
+        \verb|(/a) type must be number, but is object|
+    \end{itemize}
+
+  \item {\F{18pt} When enabled, exception messages contain a JSON Pointer to
+    the JSON value that triggered the exception.}
+
+  \item {\F{18pt} Note that enabling this macro increases the size of every
+    JSON value by one pointer and adds some runtime overhead.}
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{(De)serializing user types}
+
+\begin{itemize}
+  \item Specialize \lstinline{adl_serializer}
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+% \makeatletter
+% \write\@auxout{\string\providecommand\lastpage{\thepage}}
+% \makeatother
+\end{document}
