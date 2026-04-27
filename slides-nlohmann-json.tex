@@ -52,6 +52,28 @@
 \definecolor{araBlue2}{HTML}{0092CA}
 \definecolor{araOrange}{HTML}{DE5700}
 
+% Headers and Footers ----------------------------------------------------------
+\fancyhf{} % Clear all default header and footer fields
+
+\makeatletter
+\newcommand{\@slidetitle}{}
+\newcommand{\slidetitle}[1]{\renewcommand{\@slidetitle}{#1}}
+\providecommand{\lastpage}{12}
+
+\lhead{\fontseries{sb}\selectfont\Large\color{araBlue}\@slidetitle}
+\lfoot{\F{11pt}\color{araBlue}%
+  \hypersetup{hidelinks}\href{https://github.com/ivankp/slides-nlohmann-json}{\@title}}
+\cfoot{\F{11pt}\color{araBlue}\@author}
+\rfoot{\F{11pt}\color{araBlue}\@date
+  \begin{minipage}[b]{5em}%
+    \hfill%
+    {\F{14pt}\thepage\nobreak\hspace{1pt}}/\nobreak\hspace{1pt}\lastpage
+  \end{minipage}%
+}
+\makeatother
+
+\fancyfootoffset{1em}
+
 % Itemize, Enumerate -----------------------------------------------------------
 \setlist{
     topsep=0pt,
@@ -149,28 +171,6 @@ true, false
     {]}{{{\color{lstNamespace}{]}}}}{1},
 }
 
-% Headers and Footers ----------------------------------------------------------
-\fancyhf{} % Clear all default header and footer fields
-
-\makeatletter
-\newcommand{\@slidetitle}{}
-\newcommand{\slidetitle}[1]{\renewcommand{\@slidetitle}{#1}}
-\providecommand{\lastpage}{2}
-
-\lhead{\fontseries{sb}\selectfont\Large\color{araBlue}\@slidetitle}
-\lfoot{\F{11pt}\color{araBlue}\@title}
-\cfoot{\F{11pt}\color{araBlue}\@author}
-\rfoot{\F{11pt}\color{araBlue}\@date
-  \begin{minipage}[b]{4em}%
-    \hfill%
-    \F{14pt}\thepage/\lastpage
-    \hspace{5pt}
-  \end{minipage}%
-}
-\makeatother
-
-\fancyfootoffset{1em}
-
 % Title, Authors, Date *********************************************************
 \title{\texorpdfstring{\ttfamily nlohmann/json}{nlohmann/json}}
 \author{Ivan Pogrebnyak}
@@ -222,7 +222,7 @@ true, false
   \item \faGithub\ \ \url{https://github.com/nlohmann/json}
   \item \faFileTextO\ \ \url{https://json.nlohmann.me/api/basic_json/}
   \begin{itemize}
-    \item \faFileTextO\ \ in the slides links to documentation
+    \item \faFileTextO\ \ in the slides link to documentation
   \end{itemize}
   \item Developed since 2013
   \item Header-only library
@@ -315,7 +315,7 @@ operator @L""_json@(const char*, std::size_t); @!\hfill
     \end{lstlisting}
     \begin{itemize}
       \item \begin{lstlisting}
-using namespace nlohmann::literals;
+using namespace @Nnlohmann@::@Nliterals@;
         \end{lstlisting}
 
       \item \begin{lstlisting}
@@ -337,7 +337,7 @@ using namespace nlohmann::literals;
     \begin{itemize}
       \item \begin{lstlisting}
 @Tjson@ j;
-std::string str = j.@Fdump()@;
+std::@Tstring@ str = j.@Fdump()@;
         \end{lstlisting}
       \item Non-static member function
       \item Writes to a string
@@ -355,14 +355,6 @@ std::@Tofstream@("/opt/data.json") << j;
         \end{lstlisting}
       \item Can write directly to an output file
     \end{itemize}
-\end{itemize}
-
-\pagebreak
-% ------------------------------------------------------------------------------
-\slidetitle{Getting and setting values}
-
-\begin{itemize}
-  \item .
 \end{itemize}
 
 \pagebreak
@@ -423,7 +415,7 @@ j.@Fat@("a").@Fget@<int>()
 \begin{lstlisting}
 @P#define@ JSON_DIAGNOSTICS @L1@ @!\hfill
       \href{https://json.nlohmann.me/api/macros/json_diagnostics/}{\faFileTextO}@
-@P#include@ <nlohmann/json.hpp>
+@P#include@ @L<nlohmann/json.hpp>@
 
 const @Tjson@ j = R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ @!\color{lstNamespace}\{@ "b"@!\color{lstNamespace}:@ 1 @!\color{lstNamespace}\}@ @!\color{lstNamespace}\}@)"@L_json@;
 \end{lstlisting}
@@ -454,7 +446,90 @@ j.@Fat@("a").@Fget@<int>()
 
 \pagebreak
 % ------------------------------------------------------------------------------
-\slidetitle{(De)serializing user types}
+\slidetitle{Element access}
+
+\begin{itemize}[itemsep=0.6em]
+  \item \lstinline{operator[]()} models mutable access
+    \begin{itemize}
+      \item Insert missing keys if object is not const
+      \item Throw on missing keys if object is const
+    \end{itemize}
+  \item \lstinline{@Fat@()} models immutable access
+    \begin{itemize}
+      \item Always throw on missing keys
+    \end{itemize}
+  \item Both return references to the \lstinline{@Tvalue_type@}
+    \begin{itemize}
+      \item i.e. \lstinline{@Nnlohmann@::@Tbasic_json@&}
+    \end{itemize}
+  \item What happens if key does not exist:
+\end{itemize}
+\vspace{-0.5em}
+
+{\F{15.75pt}[24pt]
+\begin{tabular}{llll}
+\hline
+&
+\lstinline{std::@Tvector@} &
+\lstinline{std::@Tmap@} &
+\lstinline{@Nnlohmann@::@Tjson@} \\
+\hline
+\lstinline{operator[]()} & undefined behavior & insert & insert \hfill
+  \href{https://json.nlohmann.me/api/basic_json/operator%5B%5D/}{\faFileTextO} \\
+\lstinline{@Fat@()} & throw & throw & throw \hfill
+  \href{https://json.nlohmann.me/api/basic_json/at/}{\faFileTextO} \\
+\lstinline{operator[]() const} & undefined behavior & doesn't exist & throw \\
+\lstinline{@Fat@() const} & throw & throw & throw \\
+\hline
+\end{tabular}
+}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Underlying element access}
+
+\begin{itemize}
+  \item \begin{lstlisting}
+template <typename @TValue@>
+@TValue@ @Tbasic_json@::@Fget@() const @!\hfill
+      \href{https://json.nlohmann.me/api/basic_json/get/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item .
+    \end{itemize}
+
+  \item \begin{lstlisting}
+template <typename @TValue@>
+@TValue@& @Tbasic_json@::@Fget_to@(@TValue@&) const @!\hfill
+      \href{https://json.nlohmann.me/api/basic_json/get_to/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item .
+    \end{itemize}
+
+  \item \begin{lstlisting}
+template <typename @TValue@>
+@TValue@ @Tbasic_json@::@Fget_ref@() @!\itshape\color{lstKeyword}const@ @!\hfill
+      \href{https://json.nlohmann.me/api/basic_json/get_ref/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item .
+    \end{itemize}
+
+  \item \begin{lstlisting}
+template <typename @TPointer@>
+@TPointer@ @Tbasic_json@::@Fget_ptr@() @!\itshape\color{lstKeyword}const@ @!\hfill
+      \href{https://json.nlohmann.me/api/basic_json/get_ptr/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item .
+    \end{itemize}
+\end{itemize}
+
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Conversion to and from user types}
 
 \begin{itemize}
   \item Specialize \lstinline{adl_serializer}
