@@ -10,6 +10,7 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{tcolorbox}
 \usepackage{fontawesome}
 \usepackage[
   hyperfootnotes=false,
@@ -52,6 +53,8 @@
 \definecolor{araBlue2}{HTML}{0092CA}
 \definecolor{araOrange}{HTML}{DE5700}
 
+\definecolor{f6}{HTML}{F6F6F6}
+
 % Headers and Footers ----------------------------------------------------------
 \fancyhf{} % Clear all default header and footer fields
 
@@ -90,6 +93,12 @@
 \setlist[itemize,2]{label={\color{araOrange}$\circ$}}
 \setlist[itemize,3]{label={\color{araOrange}\bfseries --}}
 
+% Colorbox ----------------------------------------------------------------------------------------
+\tcbset{
+  colback=f6,
+  colframe=araBlue
+}
+
 % Listings ---------------------------------------------------------------------
 \definecolor{lstType}{HTML}{0B7A03}
 \definecolor{lstKeyword}{HTML}{BF5908}
@@ -97,7 +106,7 @@
 \definecolor{lstNamespace}{HTML}{555555}
 \definecolor{lstFunction}{HTML}{0077AA}
 \definecolor{lstComment}{HTML}{708090}
-\definecolor{lstPreproc}{HTML}{98BF10} % F06090
+\definecolor{lstPreproc}{HTML}{440099} % F06090, 98BF10
 
 \lstset{
   aboveskip=0pt,
@@ -106,6 +115,8 @@
   xleftmargin=\parindent,
 %
   upquote=true,
+%
+  basicstyle={\ttfamily},
 %
   escapeinside={@!}{@},
 %
@@ -117,8 +128,6 @@
   moredelim=[is][\color{lstFunction}]{@F}{@},
   moredelim=[is][\color{lstPreproc}]{@P}{@},
 % moredelim=[l][\color{lstPreproc}]{\#},
-%
-  basicstyle={\ttfamily},
 %
   morecomment=[l]{//}, % l is for line comment
   morecomment=[s]{/*}{*/}, % s is for start and end delimiter
@@ -205,7 +214,7 @@ true, false
 \item No comments
 \end{itemize}
 
-\vspace{1em}
+\begin{tcolorbox}
 \begin{lstlisting}[language=json]
 {
     "key": [
@@ -213,6 +222,7 @@ true, false
     ]
 }
 \end{lstlisting}
+\end{tcolorbox}
 
 \pagebreak
 % ------------------------------------------------------------------------------
@@ -230,6 +240,7 @@ true, false
   \begin{itemize}
     \item This is configurable via \lstinline{basic_json} template parameters
   \end{itemize}
+  \item Parses whole document
   \item Tries to mimic access patterns of the standard library
 \end{itemize}
 
@@ -237,20 +248,21 @@ true, false
 % ------------------------------------------------------------------------------
 \slidetitle{\ttfamily nlohmann/json}
 
+\begin{tcolorbox}
 {\F{12pt}[16pt]
 \begin{lstlisting}
 namespace @Nnlohmann@ {
 
 template <
-    template <typename @bTU@, typename @bTV@, typename... @bTArgs@> class @bTObjectType@ = std::@Tmap@,
-    template <typename @bTU@, typename... @bTArgs@> class @bTArrayType@ = std::@Tvector@,
+    template <typename, typename, typename...> class @bTObjectType@ = std::@Tmap@,
+    template <typename, typename...> class @bTArrayType@ = std::@Tvector@,
     class @bTStringType@ = std::@Tstring@,
     class @bTBooleanType@ = bool,
     class @bTNumberIntegerType@ = std::int64_t,
     class @bTNumberUnsignedType@ = std::uint64_t,
     class @bTNumberFloatType@ = double,
-    template <typename @bTU@> class @bTAllocatorType@ = std::@Tallocator@,
-    template <typename @bTT@, typename @bTSFINAE@ = void> class @bTJSONSerializer@ = @Tadl_serializer@,
+    template <typename> class @bTAllocatorType@ = std::@Tallocator@,
+    template <typename, typename = void> class @bTJSONSerializer@ = @Tadl_serializer@,
     class @bTBinaryType@ = std::@Tvector@<std::uint8_t>,
     class @bTCustomBaseClass@ = void
 >
@@ -265,6 +277,7 @@ struct @Tordered_map@ : std::@Tvector@<std::@Tpair@<const @bTKey@, @bTT@>>;
 } // namespace nlohmann
 \end{lstlisting}
 }
+\end{tcolorbox}
 
 \pagebreak
 % ------------------------------------------------------------------------------
@@ -278,23 +291,23 @@ static @Tbasic_json@
     \end{lstlisting}
     \begin{itemize}
       \item \begin{lstlisting}
-@Tjson@ j = @Tjson@::@Fparse@(std::@Tifstream@("/opt/data.json"));
+@Tjson@ j @F=@ @Tjson@::@Fparse@(std::@Tifstream@("/opt/data.json"));
         \end{lstlisting}
 
       \item \begin{lstlisting}
-@Tjson@ j = @Tjson@::@Fparse@(R"({ "key": "value" })");
+@Tjson@ j @F=@ @Tjson@::@Fparse@(R"(@!\color{lstNamespace}\{@ "key"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)");
         \end{lstlisting}
     \end{itemize}
 
   \item \begin{lstlisting}
 std::@Tistream@&
-operator>>(std::@Tistream@&, @Tbasic_json@&); @!\hfill
+operator@F>>@(std::@Tistream@&, @Tbasic_json@&); @!\hfill
       \href{https://json.nlohmann.me/api/operator_gtgt/}{\faFileTextO}@
     \end{lstlisting}
     \begin{itemize}
       \item \begin{lstlisting}
 @Tjson@ j;
-std::@Tifstream@("/opt/data.json") >> j;
+std::@Tifstream@("/opt/data.json") @F>>@ j;
         \end{lstlisting}
     \end{itemize}
 
@@ -310,7 +323,7 @@ static bool
 
   \item \begin{lstlisting}
 @Tjson@
-operator @L""_json@(const char*, std::size_t); @!\hfill
+operator ""@F_json@(const char*, std::size_t); @!\hfill
       \href{https://json.nlohmann.me/api/operator_literal_json/}{\faFileTextO}@
     \end{lstlisting}
     \begin{itemize}
@@ -319,7 +332,7 @@ using namespace @Nnlohmann@::@Nliterals@;
         \end{lstlisting}
 
       \item \begin{lstlisting}
-@Tjson@ j = R"({ "key": "value" })"@L_json@;
+@Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "key"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@F_json@;
         \end{lstlisting}
     \end{itemize}
 \end{itemize}
@@ -337,21 +350,21 @@ using namespace @Nnlohmann@::@Nliterals@;
     \begin{itemize}
       \item \begin{lstlisting}
 @Tjson@ j;
-std::@Tstring@ str = j.@Fdump()@;
+std::@Tstring@ str @F=@ j.@Fdump()@;
         \end{lstlisting}
       \item Non-static member function
       \item Writes to a string
     \end{itemize}
 
   \item \begin{lstlisting}
-std::@Tistream@&
-operator<<(std::@Tistream@&, const @Tbasic_json@&); @!\hfill
+std::@Tostream@&
+operator@F<<@(std::@Tostream@&, const @Tbasic_json@&); @!\hfill
       \href{https://json.nlohmann.me/api/operator_ltlt/}{\faFileTextO}@
     \end{lstlisting}
     \begin{itemize}
       \item \begin{lstlisting}
 @Tjson@ j;
-std::@Tofstream@("/opt/data.json") << j;
+std::@Tofstream@("/opt/data.json") @F<<@ j;
         \end{lstlisting}
       \item Can write directly to an output file
     \end{itemize}
@@ -387,7 +400,7 @@ std::@Tofstream@("/opt/data.json") << j;
 \slidetitle{Exceptions examples}
 
 \begin{lstlisting}
-const @Tjson@ j = R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@L_json@;
+const @Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@F_json@;
 \end{lstlisting}
 
 \begin{itemize}
@@ -413,11 +426,11 @@ j.@Fat@("a").@Fget@<int>()
 \slidetitle{\lstinline{JSON_DIAGNOSTICS}}
 
 \begin{lstlisting}
-@P#define@ JSON_DIAGNOSTICS @L1@ @!\hfill
+@P#define JSON_DIAGNOSTICS@ @L1@ @!\hfill
       \href{https://json.nlohmann.me/api/macros/json_diagnostics/}{\faFileTextO}@
 @P#include@ @L<nlohmann/json.hpp>@
 
-const @Tjson@ j = R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ @!\color{lstNamespace}\{@ "b"@!\color{lstNamespace}:@ 1 @!\color{lstNamespace}\}@ @!\color{lstNamespace}\}@)"@L_json@;
+const @Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ @!\color{lstNamespace}\{@ "b"@!\color{lstNamespace}:@ 1 @!\color{lstNamespace}\}@ @!\color{lstNamespace}\}@)"@F_json@;
 \end{lstlisting}
 
 \begin{itemize}[itemsep=0.3em]
@@ -449,7 +462,7 @@ j.@Fat@("a").@Fget@<int>()
 \slidetitle{Element access}
 
 \begin{itemize}[itemsep=0.6em]
-  \item \lstinline{operator[]()} models mutable access
+  \item \lstinline{operator@F[]@()} models mutable access
     \begin{itemize}
       \item Insert missing keys if object is not const
       \item Throw on missing keys if object is const
@@ -474,11 +487,11 @@ j.@Fat@("a").@Fget@<int>()
 \lstinline{std::@Tmap@} &
 \lstinline{@Nnlohmann@::@Tjson@} \\
 \hline
-\lstinline{operator[]()} & undefined behavior & insert & insert \hfill
+\lstinline{operator@F[]@()} & undefined behavior & insert & insert \hfill
   \href{https://json.nlohmann.me/api/basic_json/operator%5B%5D/}{\faFileTextO} \\
 \lstinline{@Fat@()} & throw & throw & throw \hfill
   \href{https://json.nlohmann.me/api/basic_json/at/}{\faFileTextO} \\
-\lstinline{operator[]() const} & undefined behavior & doesn't exist & throw \\
+\lstinline{operator@F[]@() const} & undefined behavior & doesn't exist & throw \\
 \lstinline{@Fat@() const} & throw & throw & throw \\
 \hline
 \end{tabular}
@@ -488,10 +501,19 @@ j.@Fat@("a").@Fget@<int>()
 % ------------------------------------------------------------------------------
 \slidetitle{Underlying element access}
 
-\begin{itemize}
+\begin{itemize}[itemsep=0.3em]
   \item \begin{lstlisting}
 template <typename @TValue@>
-@TValue@ @Tbasic_json@::@Fget@() const @!\hfill
+@PJSON_EXPLICIT@ operator @TValue@() const; @!\hfill
+      \href{https://json.nlohmann.me/api/basic_json/operator_ValueType/}{\faFileTextO}@
+    \end{lstlisting}
+    \begin{itemize}
+      \item .
+    \end{itemize}
+
+  \item \begin{lstlisting}
+template <typename @TValue@>
+@TValue@ @Tbasic_json@::@Fget@() const; @!\hfill
       \href{https://json.nlohmann.me/api/basic_json/get/}{\faFileTextO}@
     \end{lstlisting}
     \begin{itemize}
@@ -500,7 +522,7 @@ template <typename @TValue@>
 
   \item \begin{lstlisting}
 template <typename @TValue@>
-@TValue@& @Tbasic_json@::@Fget_to@(@TValue@&) const @!\hfill
+@TValue@& @Tbasic_json@::@Fget_to@(@TValue@&) const; @!\hfill
       \href{https://json.nlohmann.me/api/basic_json/get_to/}{\faFileTextO}@
     \end{lstlisting}
     \begin{itemize}
@@ -508,8 +530,8 @@ template <typename @TValue@>
     \end{itemize}
 
   \item \begin{lstlisting}
-template <typename @TValue@>
-@TValue@ @Tbasic_json@::@Fget_ref@() @!\itshape\color{lstKeyword}const@ @!\hfill
+template <typename @TReference@>
+@TReference@ @Tbasic_json@::@Fget_ref@() @!\itshape\color{lstKeyword}const@; @!\hfill
       \href{https://json.nlohmann.me/api/basic_json/get_ref/}{\faFileTextO}@
     \end{lstlisting}
     \begin{itemize}
@@ -518,7 +540,7 @@ template <typename @TValue@>
 
   \item \begin{lstlisting}
 template <typename @TPointer@>
-@TPointer@ @Tbasic_json@::@Fget_ptr@() @!\itshape\color{lstKeyword}const@ @!\hfill
+@TPointer@ @Tbasic_json@::@Fget_ptr@() @!\itshape\color{lstKeyword}const@; @!\hfill
       \href{https://json.nlohmann.me/api/basic_json/get_ptr/}{\faFileTextO}@
     \end{lstlisting}
     \begin{itemize}
