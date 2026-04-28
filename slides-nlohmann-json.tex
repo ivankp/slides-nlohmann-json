@@ -8,7 +8,7 @@
 % \usepackage{fontspec}
 \usepackage{fancyhdr}
 \usepackage{enumitem}
-\usepackage[dvipsnames]{xcolor}
+\usepackage[svgnames]{xcolor}
 \usepackage{listings}
 \usepackage{tcolorbox}
 \usepackage{fontawesome}
@@ -237,12 +237,12 @@ true, false
   \end{itemize}
   \item Developed since 2013
   \item Header-only library
-  \item Uses standard library containers to represent JSON values
-  \begin{itemize}
-    \item This is configurable via \lstinline{@Tbasic_json@} template parameters
-  \end{itemize}
   \item {\color{orange}\faWarning}\ \ Parses whole document
-  \item Tries to mimic access patterns of the standard library
+  \item Similar in spirit to the standard library container templates
+  \item Uses standard library types to represent JSON values
+    \begin{itemize}
+      \item This is configurable via \lstinline{@Tbasic_json@} template parameters
+    \end{itemize}
 \end{itemize}
 
 \pagebreak
@@ -283,6 +283,8 @@ struct @Tordered_map@ : std::@Tvector@<std::@Tpair@<const @bTKey@, @bTT@>>;
 \pagebreak
 % ------------------------------------------------------------------------------
 \slidetitle{Parsing}
+
+% TODO: split and add tcolorbox
 
 \begin{itemize}[itemsep=0.6em, before=\F{18pt}]
   \item \begin{lstlisting}
@@ -383,16 +385,16 @@ std::@Tofstream@("/opt/data.json") @F<<@ j;
   \item \lstinline{class @Texception@ : public std::@Texception@;}
   \item Subclasses:
   \begin{itemize}
-    \item \lstinline{@Tparse_error@}
-      for exceptions indicating a parse error
-    \item \lstinline{@Tinvalid_iterator@}
-      for exceptions indicating errors with iterators
-    \item \lstinline{@Ttype_error@}
-      for exceptions indicating executing a member function with a wrong type
-    \item \lstinline{@Tout_of_range@}
-      for exceptions indicating access out of the defined range
-    \item \lstinline{@Tother_error@}
-      for exceptions indicating other library errors
+    \item \lstinline{@Tparse_error@}:
+      a parsing error
+    \item \lstinline{@Tout_of_range@}:
+      access out of the defined range
+    \item \lstinline{@Ttype_error@}:
+      executing a member function with a wrong type
+    \item \lstinline{@Tinvalid_iterator@}:
+      errors with iterators
+    \item \lstinline{@Tother_error@}:
+      other library errors
   \end{itemize}
 \end{itemize}
 
@@ -500,6 +502,39 @@ int a @F=@ j.@Fat@("a");
 \hline
 \end{tabular}
 }
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Best practice}
+
+\begin{itemize}
+  \item Prefer \lstinline{@Fat@()} to \lstinline{operator@F[]@()}
+    for working with json objects that you don't intend to modify
+    to prevent accidental insertion of default values.
+\end{itemize}
+
+\vspace{1em}
+\begin{lstlisting}
+@Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@F_json@;
+\end{lstlisting}
+
+\begin{itemize}
+  \item \begin{lstlisting}
+auto& b @F=@ j.@Fat@("b");
+    \end{lstlisting}
+    \begin{itemize}
+      \item Throws since \lstinline{"b"} doesn't exist
+    \end{itemize}
+
+  \item \begin{lstlisting}
+auto& b @F=@ j["b"];
+    \end{lstlisting}
+    \begin{itemize}
+      \item Inserts \lstinline{@Lnull@} at key \lstinline{"b"}
+      \item Returns a reference to the inserted \lstinline{@Lnull@}
+    \end{itemize}
+\end{itemize}
+
 
 \pagebreak
 % ------------------------------------------------------------------------------
@@ -620,7 +655,7 @@ template <typename @TReference@>
   \item \lstinline{@TReference@} must be a reference type.
   \item \lstinline{@TReference@} must be \lstinline{const},
     if the object is \lstinline{const}.
-  \item {\color{ForestGreen}\faThumbsUp}\ \ Throws if types don't match.
+  \item {\color{Green}\faThumbsUp}\ \ Throws if types don't match.
     No accidental conversion.
 \end{itemize}
 
@@ -648,7 +683,7 @@ template <typename @TPointer@>
   \item Like \lstinline{@Fget_ref@()}, but returns \lstinline{nullptr} on failure \\
     instead of throwing.
   \item No-throw guarantee: this function never throws exceptions.
-  \item {\color{ForestGreen}\faThumbsUp}\ \ No accidental conversion.
+  \item {\color{Green}\faThumbsUp}\ \ No accidental conversion.
   \item \lstinline{@TPointer@} must be a pointer type.
   \item \lstinline{@TPointer@} must be a pointer to \lstinline{const},
     if the object is \lstinline{const}.
@@ -660,6 +695,14 @@ template <typename @TPointer@>
 std::@Tstring@* str @F=@ j.@Fget_ptr@<std::@Tstring@*>(str);
 \end{lstlisting}
 \end{tcolorbox}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Best practice}
+
+\begin{itemize}
+  \item -
+\end{itemize}
 
 \pagebreak
 % ------------------------------------------------------------------------------
