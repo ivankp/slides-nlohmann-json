@@ -240,7 +240,7 @@ true, false
   \begin{itemize}
     \item This is configurable via \lstinline{basic_json} template parameters
   \end{itemize}
-  \item Parses whole document
+  \item {\color{orange}\faWarning}\ \ Parses whole document
   \item Tries to mimic access patterns of the standard library
 \end{itemize}
 
@@ -399,13 +399,15 @@ std::@Tofstream@("/opt/data.json") @F<<@ j;
 % ------------------------------------------------------------------------------
 \slidetitle{Exceptions examples}
 
+% \begin{tcolorbox}
 \begin{lstlisting}
 const @Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@F_json@;
 \end{lstlisting}
+% \end{tcolorbox}
 
 \begin{itemize}
   \item \begin{lstlisting}
-j.@Fat@("b")
+auto& b @F=@ j.@Fat@("b"); // auto resolves to json
     \end{lstlisting}
     \begin{itemize}
       \item \color{red}\verb|[json.exception.out_of_range.403]| \\
@@ -413,7 +415,7 @@ j.@Fat@("b")
     \end{itemize}
 
   \item \begin{lstlisting}
-j.@Fat@("a").@Fget@<int>()
+int a @F=@ j.@Fat@("a");
     \end{lstlisting}
     \begin{itemize}
       \item \color{red}\verb|[json.exception.type_error.302]| \\
@@ -425,17 +427,20 @@ j.@Fat@("a").@Fget@<int>()
 % ------------------------------------------------------------------------------
 \slidetitle{\lstinline{JSON_DIAGNOSTICS}}
 
+% \begin{tcolorbox}
 \begin{lstlisting}
 @P#define JSON_DIAGNOSTICS@ @L1@ @!\hfill
       \href{https://json.nlohmann.me/api/macros/json_diagnostics/}{\faFileTextO}@
-@P#include@ @L<nlohmann/json.hpp>@
+@P#include@ @L<nlohmann/json.hpp>@@!\vspace{-0.8em}@
 
 const @Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ @!\color{lstNamespace}\{@ "b"@!\color{lstNamespace}:@ 1 @!\color{lstNamespace}\}@ @!\color{lstNamespace}\}@)"@F_json@;
 \end{lstlisting}
+% \end{tcolorbox}
+% \vspace{-6pt}
 
-\begin{itemize}[itemsep=0.3em]
+\begin{itemize}[itemsep=0.2em]
   \item \begin{lstlisting}
-j.@Fat@("a").@Fat@("c")
+auto& c @F=@ j.@Fat@("a").@Fat@("c");
     \end{lstlisting}
     \begin{itemize}
       \item \color{red}\verb|[json.exception.out_of_range.403]| \\
@@ -443,7 +448,7 @@ j.@Fat@("a").@Fat@("c")
     \end{itemize}
 
   \item \begin{lstlisting}
-j.@Fat@("a").@Fget@<int>()
+int a @F=@ j.@Fat@("a");
     \end{lstlisting}
     \begin{itemize}
       \item \color{red}\verb|[json.exception.type_error.302]| \\
@@ -453,18 +458,19 @@ j.@Fat@("a").@Fget@<int>()
   \item {\F{18pt} When enabled, exception messages contain a JSON Pointer to
     the JSON value that triggered the exception.}
 
-  \item {\F{18pt} Note that enabling this macro increases the size of every
-    JSON value by one pointer and adds some runtime overhead.}
+  \item {\F{18pt} {\color{orange}\faWarning}\ \ Note that enabling this macro increases
+    the size of every JSON value by one pointer and adds some runtime overhead.}
 \end{itemize}
+% \vspace{-16pt}
 
 \pagebreak
 % ------------------------------------------------------------------------------
-\slidetitle{Element access}
+\slidetitle{JSON node access}
 
 \begin{itemize}[itemsep=0.6em]
   \item \lstinline{operator@F[]@()} models mutable access
     \begin{itemize}
-      \item Insert missing keys if object is not const
+      \item {\color{orange}\faWarning}\ \ Insert missing keys if object is not const
       \item Throw on missing keys if object is const
     \end{itemize}
   \item \lstinline{@Fat@()} models immutable access
@@ -499,53 +505,77 @@ j.@Fat@("a").@Fget@<int>()
 
 \pagebreak
 % ------------------------------------------------------------------------------
-\slidetitle{Underlying element access}
+\slidetitle{Value access}
 
-\begin{itemize}[itemsep=0.3em]
-  \item \begin{lstlisting}
+\begin{tcolorbox}
+\begin{lstlisting}
 template <typename @TValue@>
-@PJSON_EXPLICIT@ operator @TValue@() const; @!\hfill
-      \href{https://json.nlohmann.me/api/basic_json/operator_ValueType/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item .
-    \end{itemize}
+@PJSON_EXPLICIT@
+@Tbasic_json@::operator @TValue@() const; @!\hfill
+  \href{https://json.nlohmann.me/api/basic_json/operator_ValueType/}{\faFileTextO}@
+\end{lstlisting}
+\end{tcolorbox}
 
-  \item \begin{lstlisting}
+\begin{itemize}
+  \item {\itshape Implicit} cast operator
+  \item {\color{red}\faWarning}\ \ Can silently convert float to integer
+    \begin{itemize}
+      \item Can explicitly check with \lstinline{@Fis_number_integer@()} \hfill
+        \href{https://json.nlohmann.me/features/types/number_handling/#determine-number-types}{\faFileTextO}
+    \end{itemize}
+  \item Implemented by calling \lstinline{@Fget@<@TValue@>()}.
+\end{itemize}
+
+\begin{tcolorbox}
+\begin{lstlisting}
+@Tjson@ j;
+std::@Tstring@ str;
+str @F=@ j;
+\end{lstlisting}
+\end{tcolorbox}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Value access}
+
+\begin{lstlisting}
 template <typename @TValue@>
 @TValue@ @Tbasic_json@::@Fget@() const; @!\hfill
-      \href{https://json.nlohmann.me/api/basic_json/get/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item .
-    \end{itemize}
+  \href{https://json.nlohmann.me/api/basic_json/get/}{\faFileTextO}@
+\end{lstlisting}
 
-  \item \begin{lstlisting}
+\begin{itemize}
+  \item .
+\end{itemize}
+
+\begin{lstlisting}
 template <typename @TValue@>
 @TValue@& @Tbasic_json@::@Fget_to@(@TValue@&) const; @!\hfill
-      \href{https://json.nlohmann.me/api/basic_json/get_to/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item .
-    \end{itemize}
+  \href{https://json.nlohmann.me/api/basic_json/get_to/}{\faFileTextO}@
+\end{lstlisting}
 
-  \item \begin{lstlisting}
+\begin{itemize}
+  \item .
+\end{itemize}
+
+\begin{lstlisting}
 template <typename @TReference@>
 @TReference@ @Tbasic_json@::@Fget_ref@() @!\itshape\color{lstKeyword}const@; @!\hfill
-      \href{https://json.nlohmann.me/api/basic_json/get_ref/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item .
-    \end{itemize}
+  \href{https://json.nlohmann.me/api/basic_json/get_ref/}{\faFileTextO}@
+\end{lstlisting}
 
-  \item \begin{lstlisting}
+\begin{itemize}
+  \item .
+\end{itemize}
+
+\begin{lstlisting}
 template <typename @TPointer@>
 @TPointer@ @Tbasic_json@::@Fget_ptr@() @!\itshape\color{lstKeyword}const@; @!\hfill
-      \href{https://json.nlohmann.me/api/basic_json/get_ptr/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item .
-    \end{itemize}
+  \href{https://json.nlohmann.me/api/basic_json/get_ptr/}{\faFileTextO}@
+\end{lstlisting}
+
+\begin{itemize}
+  \item .
 \end{itemize}
 
 
