@@ -8,7 +8,7 @@
 % \usepackage{fontspec}
 \usepackage{fancyhdr}
 \usepackage{enumitem}
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{listings}
 \usepackage{tcolorbox}
 \usepackage{fontawesome}
@@ -61,7 +61,7 @@
 \makeatletter
 \newcommand{\@slidetitle}{}
 \newcommand{\slidetitle}[1]{\renewcommand{\@slidetitle}{#1}}
-\providecommand{\lastpage}{12}
+\providecommand{\lastpage}{15}
 
 \lhead{\fontseries{sb}\selectfont\Large\color{araBlue}\@slidetitle}
 \lfoot{\F{11pt}\color{araBlue}%
@@ -146,7 +146,8 @@ contract_assert, decltype, default, delete, do, dynamic_cast, else, enum, explic
 for, friend, goto, if, inline, mutable, namespace, new, noexcept, not, not_eq, operator, or, or_eq,
 private, protected, public, reflexpr, register, reinterpret_cast, requires, return, sizeof, static,
 static_assert, static_cast, struct, switch, synchronized, template, this, thread_local, throw, try,
-typedef, typeid, typename, union, using, virtual, volatile, while, xor, xor_eq
+typedef, typeid, typename, union, using, virtual, volatile, while, xor, xor_eq,
+nullptr
   },
   keywordstyle=[0]\color{lstKeyword},
 %
@@ -238,7 +239,7 @@ true, false
   \item Header-only library
   \item Uses standard library containers to represent JSON values
   \begin{itemize}
-    \item This is configurable via \lstinline{basic_json} template parameters
+    \item This is configurable via \lstinline{@Tbasic_json@} template parameters
   \end{itemize}
   \item {\color{orange}\faWarning}\ \ Parses whole document
   \item Tries to mimic access patterns of the standard library
@@ -407,7 +408,7 @@ const @Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ "v
 
 \begin{itemize}
   \item \begin{lstlisting}
-auto& b @F=@ j.@Fat@("b"); // auto resolves to json
+auto& b @F=@ j.@Fat@("b"); // auto resolves to const json
     \end{lstlisting}
     \begin{itemize}
       \item \color{red}\verb|[json.exception.out_of_range.403]| \\
@@ -427,7 +428,6 @@ int a @F=@ j.@Fat@("a");
 % ------------------------------------------------------------------------------
 \slidetitle{\lstinline{JSON_DIAGNOSTICS}}
 
-% \begin{tcolorbox}
 \begin{lstlisting}
 @P#define JSON_DIAGNOSTICS@ @L1@ @!\hfill
       \href{https://json.nlohmann.me/api/macros/json_diagnostics/}{\faFileTextO}@
@@ -435,8 +435,7 @@ int a @F=@ j.@Fat@("a");
 
 const @Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ @!\color{lstNamespace}\{@ "b"@!\color{lstNamespace}:@ 1 @!\color{lstNamespace}\}@ @!\color{lstNamespace}\}@)"@F_json@;
 \end{lstlisting}
-% \end{tcolorbox}
-% \vspace{-6pt}
+\vspace{-0.5em}
 
 \begin{itemize}[itemsep=0.2em]
   \item \begin{lstlisting}
@@ -461,7 +460,6 @@ int a @F=@ j.@Fat@("a");
   \item {\F{18pt} {\color{orange}\faWarning}\ \ Note that enabling this macro increases
     the size of every JSON value by one pointer and adds some runtime overhead.}
 \end{itemize}
-% \vspace{-16pt}
 
 \pagebreak
 % ------------------------------------------------------------------------------
@@ -515,22 +513,23 @@ template <typename @TValue@>
   \href{https://json.nlohmann.me/api/basic_json/operator_ValueType/}{\faFileTextO}@
 \end{lstlisting}
 \end{tcolorbox}
+\vspace{0em}
 
-\begin{itemize}
+\begin{itemize}[itemsep=0.7em]
   \item {\itshape Implicit} cast operator
-  \item {\color{red}\faWarning}\ \ Can silently convert float to integer
+  \item {\color{red}\faWarning}\ \ Can silently convert float to integer and vice versa
     \begin{itemize}
       \item Can explicitly check with \lstinline{@Fis_number_integer@()} \hfill
         \href{https://json.nlohmann.me/features/types/number_handling/#determine-number-types}{\faFileTextO}
     \end{itemize}
-  \item Implemented by calling \lstinline{@Fget@<@TValue@>()}.
+  \item Implemented by calling \lstinline{@Fget@<@TValue@>()}
+  \item Returns by value
 \end{itemize}
 
 \begin{tcolorbox}
 \begin{lstlisting}
 @Tjson@ j;
-std::@Tstring@ str;
-str @F=@ j;
+std::@Tstring@ str @F=@ j;
 \end{lstlisting}
 \end{tcolorbox}
 
@@ -538,46 +537,129 @@ str @F=@ j;
 % ------------------------------------------------------------------------------
 \slidetitle{Value access}
 
+\begin{tcolorbox}
 \begin{lstlisting}
 template <typename @TValue@>
 @TValue@ @Tbasic_json@::@Fget@() const; @!\hfill
   \href{https://json.nlohmann.me/api/basic_json/get/}{\faFileTextO}@
 \end{lstlisting}
+\end{tcolorbox}
+\vspace{0em}
 
-\begin{itemize}
-  \item .
+\begin{itemize}[itemsep=0.7em]
+  \item {\color{red}\faWarning}\ \ Can silently convert float to integer and vice versa.
+  \item Returns by value. \lstinline{@TValue@} can't be a reference type.
+  \item Implementation equivalent to \vspace{-0.5em}
+\begin{tcolorbox}
+\begin{lstlisting}
+@TValue@ tmp; // creates a temporary
+@TJSONSerializer@<@TValue@>::@Ffrom_json@(*this, tmp);
+return tmp;
+\end{lstlisting}
+\end{tcolorbox}
 \end{itemize}
 
+\begin{tcolorbox}
+\begin{lstlisting}
+@Tjson@ j;
+std::@Tstring@ str @F=@ j.@Fget@<std::@Tstring@>();
+\end{lstlisting}
+\end{tcolorbox}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Value access}
+
+\begin{tcolorbox}
 \begin{lstlisting}
 template <typename @TValue@>
-@TValue@& @Tbasic_json@::@Fget_to@(@TValue@&) const; @!\hfill
+@TValue@& @Tbasic_json@::@Fget_to@(@TValue@& v) const; @!\hfill
   \href{https://json.nlohmann.me/api/basic_json/get_to/}{\faFileTextO}@
 \end{lstlisting}
+\end{tcolorbox}
+\vspace{0em}
 
-\begin{itemize}
-  \item .
+\begin{itemize}[itemsep=0.7em]
+  \item {\color{red}\faWarning}\ \ Can silently convert float to integer and vice versa
+  \item Avoids a temporary variable
+  \item Implementation equivalent to \vspace{-0.5em}
+\begin{tcolorbox}
+\begin{lstlisting}
+@TJSONSerializer@<@TValue@>::@Ffrom_json@(*this, v);
+\end{lstlisting}
+\end{tcolorbox}
 \end{itemize}
 
+\begin{tcolorbox}
+\begin{lstlisting}
+@Tjson@ j;
+std::@Tstring@ str;
+j.@Fget_to@(str);
+\end{lstlisting}
+\end{tcolorbox}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Value access}
+
+\begin{tcolorbox}
 \begin{lstlisting}
 template <typename @TReference@>
 @TReference@ @Tbasic_json@::@Fget_ref@() @!\itshape\color{lstKeyword}const@; @!\hfill
   \href{https://json.nlohmann.me/api/basic_json/get_ref/}{\faFileTextO}@
 \end{lstlisting}
+\end{tcolorbox}
+\vspace{0em}
 
-\begin{itemize}
-  \item .
+\begin{itemize}[itemsep=0.7em]
+  \item Returns a reference to the internally stored value.
+    \begin{itemize}
+      \item No copies are made.
+      \item This reference can be mutable.
+    \end{itemize}
+  \item \lstinline{@TReference@} must be a reference type.
+  \item \lstinline{@TReference@} must be \lstinline{const},
+    if the object is \lstinline{const}.
+  \item {\color{ForestGreen}\faThumbsUp}\ \ Throws if types don't match.
+    No accidental conversion.
 \end{itemize}
 
+\begin{tcolorbox}
+\begin{lstlisting}
+@Tjson@ j;
+std::@Tstring@& str @F=@ j.@Fget_ref@<std::@Tstring@&>(str);
+\end{lstlisting}
+\end{tcolorbox}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Value access}
+
+\begin{tcolorbox}
 \begin{lstlisting}
 template <typename @TPointer@>
-@TPointer@ @Tbasic_json@::@Fget_ptr@() @!\itshape\color{lstKeyword}const@; @!\hfill
+@TPointer@ @Tbasic_json@::@Fget_ptr@() @!\itshape\color{lstKeyword}const@ noexcept; @!\hfill
   \href{https://json.nlohmann.me/api/basic_json/get_ptr/}{\faFileTextO}@
 \end{lstlisting}
+\end{tcolorbox}
+\vspace{0em}
 
-\begin{itemize}
-  \item .
+\begin{itemize}[itemsep=0.7em]
+  \item Like \lstinline{@Fget_ref@()}, but returns \lstinline{nullptr} on failure \\
+    instead of throwing.
+  \item No-throw guarantee: this function never throws exceptions.
+  \item {\color{ForestGreen}\faThumbsUp}\ \ No accidental conversion.
+  \item \lstinline{@TPointer@} must be a pointer type.
+  \item \lstinline{@TPointer@} must be a pointer to \lstinline{const},
+    if the object is \lstinline{const}.
 \end{itemize}
 
+\begin{tcolorbox}
+\begin{lstlisting}
+@Tjson@ j;
+std::@Tstring@* str @F=@ j.@Fget_ptr@<std::@Tstring@*>(str);
+\end{lstlisting}
+\end{tcolorbox}
 
 \pagebreak
 % ------------------------------------------------------------------------------
