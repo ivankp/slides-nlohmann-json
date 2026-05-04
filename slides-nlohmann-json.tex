@@ -818,11 +818,15 @@ std::@Tstring@* str @F=@ j.@Fget_ptr@<std::@Tstring@*>(str);
     if you are worried.
   \item Use \lstinline{@Fget_ptr@<@TT@>()},
     to avoid exceptions.
-  \item \lstinline{@Fget@<@TT@>()} is just a verbose version of
+  \item Use \lstinline{@Fget_to@<@TT@>()},
+    to avoid temporary values used by other \lstinline{@Fget_@}
+    functions.
+  \item \lstinline{@Fget@<@TT@>()} is a verbose version of
     \lstinline{operator @TT@}.
     \begin{itemize}
       \item Can be useful in \lstinline{return} statements of functions
-        returning \lstinline{auto}.
+        returning \lstinline{auto}
+      \item or in assignments to types different from \lstinline{@TT@}.
     \end{itemize}
 \end{itemize}
 
