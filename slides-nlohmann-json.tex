@@ -8,7 +8,7 @@
 % \usepackage{fontspec}
 \usepackage{fancyhdr}
 \usepackage{enumitem}
-\usepackage[svgnames]{xcolor}
+\usepackage{xcolor}
 \usepackage{listings}
 \usepackage{tcolorbox}
 \usepackage{fontawesome}
@@ -41,7 +41,7 @@
   FontFace = {eb}{it}{*-BlackItalic}
 ]
 
-\setmonofont[Scale=0.95]{DejaVu Sans Mono}
+\setmonofont{DejaVu Sans Mono}
 
 \NewDocumentCommand\F{mO{#1}}{\fontsize{#1}{#2}\selectfont}
 
@@ -54,6 +54,7 @@
 \definecolor{araOrange}{HTML}{DE5700}
 
 \definecolor{f6}{HTML}{F6F6F6}
+\definecolor{green80}{HTML}{008000}
 
 % Headers and Footers ----------------------------------------------------------
 \fancyhf{} % Clear all default header and footer fields
@@ -61,7 +62,11 @@
 \makeatletter
 \newcommand{\@slidetitle}{}
 \newcommand{\slidetitle}[1]{\renewcommand{\@slidetitle}{#1}}
-\providecommand{\lastpage}{15}
+
+\providecommand{\lastpage}{0}
+\AtEndDocument{
+  \write\@auxout{\string\gdef\string\lastpage{\thepage}}
+}
 
 \lhead{\fontseries{sb}\selectfont\Large\color{araBlue}\@slidetitle}
 \lfoot{\F{11pt}\color{araBlue}%
@@ -100,13 +105,13 @@
 }
 
 % Listings ---------------------------------------------------------------------
-\definecolor{lstType}{HTML}{0B7A03}
-\definecolor{lstKeyword}{HTML}{BF5908}
-\definecolor{lstLiteral}{HTML}{990055}
-\definecolor{lstNamespace}{HTML}{555555}
+\definecolor{lstType}{HTML}{008000} % cppreference k
+\definecolor{lstKeyword}{HTML}{440099}
+\definecolor{lstLiteral}{HTML}{B00040} % cppreference kt
+\definecolor{lstNamespace}{HTML}{505050}
 \definecolor{lstFunction}{HTML}{0077AA}
 \definecolor{lstComment}{HTML}{708090}
-\definecolor{lstPreproc}{HTML}{440099} % F06090, 98BF10
+\definecolor{lstPreproc}{HTML}{9C6500} % cppreference cp
 
 \lstset{
   aboveskip=0pt,
@@ -168,17 +173,19 @@ true, false
     {std::}{{{\color{lstNamespace}{std::}}}}{5}
 }
 
+\definecolor{jsep}{HTML}{670026}
+
 \lstdefinelanguage{json}{
   basicstyle={\ttfamily\color{lstLiteral}},
   upquote=true,
   showstringspaces=false,
   literate=
-    {:}{{{\color{lstNamespace}{:}}}}{1}
-    {,}{{{\color{lstNamespace}{,}}}}{1}
-    {\{}{{{\color{lstNamespace}{\{}}}}{1}
-    {\}}{{{\color{lstNamespace}{\}}}}}{1}
-    {[}{{{\color{lstNamespace}{[}}}}{1}
-    {]}{{{\color{lstNamespace}{]}}}}{1},
+    {:}{{{\color{jsep}{:}}}}{1}
+    {,}{{{\color{jsep}{,}}}}{1}
+    {\{}{{{\color{jsep}{\{}}}}{1}
+    {\}}{{{\color{jsep}{\}}}}}{1}
+    {[}{{{\color{jsep}{[}}}}{1}
+    {]}{{{\color{jsep}{]}}}}{1},
 }
 
 % Title, Authors, Date *********************************************************
@@ -229,7 +236,7 @@ true, false
 % ------------------------------------------------------------------------------
 \slidetitle{\lstinline{nlohmann/json}}
 
-\begin{itemize}
+\begin{itemize}[itemsep=0.5em]
   \item \faGithub\ \ \url{https://github.com/nlohmann/json}
   \item \faFileTextO\ \ \url{https://json.nlohmann.me/api/basic_json/}
   \begin{itemize}
@@ -237,7 +244,12 @@ true, false
   \end{itemize}
   \item Developed since 2013
   \item Header-only library
+  \item {\color{orange}\faWarning}\ \ Not a fast library but easy to use
   \item {\color{orange}\faWarning}\ \ Parses whole document
+  \item {\color{orange}\faWarning}\ \ Handles errors via exception
+    \begin{itemize}
+      \item Unless you explicitly use non-throwing interfaces
+    \end{itemize}
   \item Similar in spirit to the standard library container templates
   \item Uses standard library types to represent JSON values
     \begin{itemize}
@@ -284,93 +296,155 @@ struct @Tordered_map@ : std::@Tvector@<std::@Tpair@<const @bTKey@, @bTT@>>;
 % ------------------------------------------------------------------------------
 \slidetitle{Parsing}
 
-% TODO: split and add tcolorbox
+\begin{tcolorbox}
+\begin{lstlisting}
+static @Tbasic_json@ @Tbasic_json@::@Fparse@(); @!{\hfill
+  \href{https://json.nlohmann.me/api/basic_json/parse/}{\faFileTextO}}@
+\end{lstlisting}
+\end{tcolorbox}
+\vspace{0em}
 
-\begin{itemize}[itemsep=0.6em, before=\F{18pt}]
-  \item \begin{lstlisting}
-static @Tbasic_json@
-@Tbasic_json@::@Fparse@(); @!{\hfill
-      \href{https://json.nlohmann.me/api/basic_json/parse/}{\faFileTextO}}@
-    \end{lstlisting}
+\begin{itemize}[itemsep=0.5em]
+  \item Valid arguments:
     \begin{itemize}
-      \item \begin{lstlisting}
-@Tjson@ j @F=@ @Tjson@::@Fparse@(std::@Tifstream@("/opt/data.json"));
-        \end{lstlisting}
-
-      \item \begin{lstlisting}
-@Tjson@ j @F=@ @Tjson@::@Fparse@(R"(@!\color{lstNamespace}\{@ "key"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)");
-        \end{lstlisting}
+      \item \lstinline{std::@Tistream@}
+      \item \lstinline{@TFILE@*}
+      \item null-terminated \lstinline{char*} or \lstinline{uint8_t*}
+      \item an object \lstinline{obj} with \lstinline{@Fbegin@(obj)} and
+        \lstinline{@Fend@(obj)}: \lstinline{std::@Tstring@}
+      \item a pair of iterators
     \end{itemize}
 
-  \item \begin{lstlisting}
+  \item Examples:
+    \begin{itemize}
+      \item Parse a file
+        \vspace{-0.5em}
+        \begin{tcolorbox}{\F{16pt}
+        \begin{lstlisting}
+const @Tjson@ j @F=@ @Tjson@::@Fparse@(std::@Tifstream@("data.json"));
+        \end{lstlisting}
+        }\end{tcolorbox}
+
+      \item Parse a string
+        \vspace{-0.5em}
+        \begin{tcolorbox}{\F{16pt}
+        \begin{lstlisting}
+const @Tjson@ j @F=@ @Tjson@::@Fparse@(R"(@!\color{jsep}\{@ "key"@!\color{jsep}:@ "value" @!\color{jsep}\}@)");
+        \end{lstlisting}
+        }\end{tcolorbox}
+    \end{itemize}
+\end{itemize}
+\vspace{-1em}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Parsing}
+
+\begin{tcolorbox}
+\begin{lstlisting}
 std::@Tistream@&
 operator@F>>@(std::@Tistream@&, @Tbasic_json@&); @!\hfill
-      \href{https://json.nlohmann.me/api/operator_gtgt/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item \begin{lstlisting}
-@Tjson@ j;
+  \href{https://json.nlohmann.me/api/operator_gtgt/}{\faFileTextO}@
+\end{lstlisting}
+\end{tcolorbox}
+
+\begin{itemize}
+  \item Can read json data from an input stream
+    \begin{tcolorbox}{\F{16pt}[26pt]
+    \begin{lstlisting}
+@Tjson@ j; // can't be const
 std::@Tifstream@("/opt/data.json") @F>>@ j;
-        \end{lstlisting}
-    \end{itemize}
-
-  \item \begin{lstlisting}
-static bool
-@Tbasic_json@::@Faccept@(); @!\hfill
-      \href{https://json.nlohmann.me/api/basic_json/accept/}{\faFileTextO}@
     \end{lstlisting}
-    \begin{itemize}
-      \item Accepts same types as \lstinline{@Fparse@()}
-      \item Only checks if the input is valid JSON
-    \end{itemize}
+    }\end{tcolorbox}
+\end{itemize}
 
-  \item \begin{lstlisting}
-@Tjson@
-operator ""@F_json@(const char*, std::size_t); @!\hfill
-      \href{https://json.nlohmann.me/api/operator_literal_json/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item \begin{lstlisting}
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Parsing}
+
+\begin{tcolorbox}
+\begin{lstlisting}
+static bool @Tbasic_json@::@Faccept@(); @!\hfill
+  \href{https://json.nlohmann.me/api/basic_json/accept/}{\faFileTextO}@
+\end{lstlisting}
+\end{tcolorbox}
+
+\begin{itemize}
+  \item Accepts same arguments as \lstinline{@Fparse@()}
+  \item Only checks if the input is valid JSON
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Parsing}
+
+\begin{tcolorbox}{\F{18pt}[20pt]
+\begin{lstlisting}
+@Tjson@ operator ""@F_json@(const char*, std::size_t); @!\hfill
+  \href{https://json.nlohmann.me/api/operator_literal_json/}{\faFileTextO}@
+\end{lstlisting}
+}\end{tcolorbox}
+
+\begin{itemize}
+  \item User-defined literal operator
+  \item {\color{orange}\faWarning}\ \ Parses at run time
+  \item Not \lstinline{constexpr}
+  \item Example:
+    \begin{tcolorbox}{\F{16pt}[26pt]
+    \begin{lstlisting}
 using namespace @Nnlohmann@::@Nliterals@;
-        \end{lstlisting}
-
-      \item \begin{lstlisting}
-@Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "key"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@F_json@;
-        \end{lstlisting}
-    \end{itemize}
+const @Tjson@ j @F=@ R"(@!\color{jsep}\{@ "key"@!\color{jsep}:@ "value" @!\color{jsep}\}@)"@F_json@;
+    \end{lstlisting}
+    }\end{tcolorbox}
 \end{itemize}
 
 \pagebreak
 % ------------------------------------------------------------------------------
 \slidetitle{Emitting}
 
-\begin{itemize}
-  \item \begin{lstlisting}
-@Tbasic_json@::@Tstring_t@
-@Tbasic_json@::@Fdump@() const; @!\hfill
-      \href{https://json.nlohmann.me/api/basic_json/dump/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item \begin{lstlisting}
-@Tjson@ j;
-std::@Tstring@ str @F=@ j.@Fdump()@;
-        \end{lstlisting}
-      \item Non-static member function
-      \item Writes to a string
-    \end{itemize}
+\begin{tcolorbox}{\F{19pt}
+\begin{lstlisting}
+@Tbasic_json@::@Tstring_t@ @Tbasic_json@::@Fdump@() const; @!\hfill
+  \href{https://json.nlohmann.me/api/basic_json/dump/}{\faFileTextO}@
+\end{lstlisting}
+}\end{tcolorbox}
 
-  \item \begin{lstlisting}
+\begin{itemize}
+  \item Non-static member function
+  \item Writes to a string
+  \begin{itemize}
+    \item {\color{orange}\faWarning}\ \ Use \lstinline{operator@F<<@}{}
+      to write directly to a file
+  \end{itemize}
+  \item Example:
+    \begin{tcolorbox}{\F{16pt}[26pt]
+    \begin{lstlisting}
+const @Tjson@ j;
+const std::@Tstring@ str @F=@ j.@Fdump@();
+    \end{lstlisting}
+    }\end{tcolorbox}
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{Emitting}
+
+\begin{tcolorbox}{\F{19pt}[28pt]
+\begin{lstlisting}
 std::@Tostream@&
 operator@F<<@(std::@Tostream@&, const @Tbasic_json@&); @!\hfill
-      \href{https://json.nlohmann.me/api/operator_ltlt/}{\faFileTextO}@
-    \end{lstlisting}
-    \begin{itemize}
-      \item \begin{lstlisting}
-@Tjson@ j;
+  \href{https://json.nlohmann.me/api/operator_ltlt/}{\faFileTextO}@
+\end{lstlisting}
+}\end{tcolorbox}
+
+\begin{itemize}
+  \item Can directly write to a file
+    \begin{tcolorbox}{\F{16pt}[26pt]
+    \begin{lstlisting}
+const @Tjson@ j;
 std::@Tofstream@("/opt/data.json") @F<<@ j;
-        \end{lstlisting}
-      \item Can write directly to an output file
-    \end{itemize}
+    \end{lstlisting}
+    }\end{tcolorbox}
 \end{itemize}
 
 \pagebreak
@@ -383,19 +457,42 @@ std::@Tofstream@("/opt/data.json") @F<<@ j;
       \href{https://json.nlohmann.me/api/basic_json/exception/}{\faFileTextO}@
     \end{lstlisting}
   \item \lstinline{class @Texception@ : public std::@Texception@;}
-  \item Subclasses:
-  \begin{itemize}
-    \item \lstinline{@Tparse_error@}:
-      a parsing error
-    \item \lstinline{@Tout_of_range@}:
-      access out of the defined range
-    \item \lstinline{@Ttype_error@}:
-      executing a member function with a wrong type
-    \item \lstinline{@Tinvalid_iterator@}:
-      errors with iterators
-    \item \lstinline{@Tother_error@}:
-      other library errors
-  \end{itemize}
+  \item Sub-classes:
+    \begin{itemize}
+      \item \lstinline{@Tparse_error@}:
+        a parsing error
+      \item \lstinline{@Tout_of_range@}:
+        access out of the defined range
+      \item \lstinline{@Ttype_error@}:
+        executing a member function with a wrong type
+      \item \lstinline{@Tinvalid_iterator@}:
+        errors with iterators
+      \item \lstinline{@Tother_error@}:
+        other library errors
+    \end{itemize}
+  \item Full list of exceptions \hfill
+    \href{https://json.nlohmann.me/home/exceptions/}{\faFileTextO}
+\end{itemize}
+
+\pagebreak
+% ------------------------------------------------------------------------------
+\slidetitle{\faHandORight\,\ Best practice: Use exceptions}
+
+\begin{itemize}
+  \item Exceptions provide diagnostic information.
+  \item Most {\ttfamily nlohmann} interfaces don't have non-throwing options.
+  \item {\ttfamily nlohmann} interfaces that can be used without exceptions
+    can only report the fact of failure with no clarifying information.
+    \begin{itemize}
+      \item \lstinline{@Fparse@()} returns \lstinline{@Tbasic_json@} in
+        \lstinline{discarded} state.
+    \end{itemize}
+  \item Exceptions can be switched off for the whole library \hfill
+    \href{https://json.nlohmann.me/home/exceptions/#switch-off-exceptions}{\faFileTextO}
+    \begin{itemize}
+      \item \lstinline{@Fabort@()} is called anywhere the library would
+        \lstinline{throw}.
+    \end{itemize}
 \end{itemize}
 
 \pagebreak
@@ -404,13 +501,13 @@ std::@Tofstream@("/opt/data.json") @F<<@ j;
 
 % \begin{tcolorbox}
 \begin{lstlisting}
-const @Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@F_json@;
+const @Tjson@ j @F=@ R"(@!\color{jsep}\{@ "a"@!\color{jsep}:@ "value" @!\color{jsep}\}@)"@F_json@;
 \end{lstlisting}
 % \end{tcolorbox}
 
 \begin{itemize}
   \item \begin{lstlisting}
-auto& b @F=@ j.@Fat@("b"); // auto resolves to const json
+auto& b @F=@ j.@Fat@("b"); // auto @!{\color{lstComment}$\rightarrow$}@ const json
     \end{lstlisting}
     \begin{itemize}
       \item \color{red}\verb|[json.exception.out_of_range.403]| \\
@@ -435,7 +532,7 @@ int a @F=@ j.@Fat@("a");
       \href{https://json.nlohmann.me/api/macros/json_diagnostics/}{\faFileTextO}@
 @P#include@ @L<nlohmann/json.hpp>@@!\vspace{-0.8em}@
 
-const @Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ @!\color{lstNamespace}\{@ "b"@!\color{lstNamespace}:@ 1 @!\color{lstNamespace}\}@ @!\color{lstNamespace}\}@)"@F_json@;
+const @Tjson@ j @F=@ R"(@!\color{jsep}\{@ "a"@!\color{jsep}:@ @!\color{jsep}\{@ "b"@!\color{jsep}:@ 1 @!\color{jsep}\}@ @!\color{jsep}\}@)"@F_json@;
 \end{lstlisting}
 \vspace{-0.5em}
 
@@ -470,12 +567,13 @@ int a @F=@ j.@Fat@("a");
 \begin{itemize}[itemsep=0.6em]
   \item \lstinline{operator@F[]@()} models mutable access
     \begin{itemize}
-      \item {\color{orange}\faWarning}\ \ Insert missing keys if object is not const
-      \item Throw on missing keys if object is const
+      \item {\color{orange}\faWarning}\ \ Inserts missing keys if the object is
+        not \lstinline{const}
+      \item Throws on missing keys if the object is \lstinline{const}
     \end{itemize}
   \item \lstinline{@Fat@()} models immutable access
     \begin{itemize}
-      \item Always throw on missing keys
+      \item Always throws on missing keys
     \end{itemize}
   \item Both return references to the \lstinline{@Tvalue_type@}
     \begin{itemize}
@@ -505,7 +603,7 @@ int a @F=@ j.@Fat@("a");
 
 \pagebreak
 % ------------------------------------------------------------------------------
-\slidetitle{Best practice}
+\slidetitle{\faHandORight\,\ Best practice: \lstinline{json.at()}}
 
 \begin{itemize}
   \item Prefer \lstinline{@Fat@()} to \lstinline{operator@F[]@()}
@@ -515,10 +613,11 @@ int a @F=@ j.@Fat@("a");
 
 \vspace{1em}
 \begin{lstlisting}
-@Tjson@ j @F=@ R"(@!\color{lstNamespace}\{@ "a"@!\color{lstNamespace}:@ "value" @!\color{lstNamespace}\}@)"@F_json@;
+@Tjson@ j @F=@ R"(@!\color{jsep}\{@ "a"@!\color{jsep}:@ "value" @!\color{jsep}\}@)"@F_json@;
 \end{lstlisting}
+\vspace{-0.5em}
 
-\begin{itemize}
+\begin{itemize}[itemsep=0.5em]
   \item \begin{lstlisting}
 auto& b @F=@ j.@Fat@("b");
     \end{lstlisting}
@@ -532,6 +631,17 @@ auto& b @F=@ j["b"];
     \begin{itemize}
       \item Inserts \lstinline{@Lnull@} at key \lstinline{"b"}
       \item Returns a reference to the inserted \lstinline{@Lnull@}
+    \end{itemize}
+
+  \item \begin{lstlisting}
+auto& b2 @F=@ j["b1"]["b2"];
+    \end{lstlisting}
+    \begin{itemize}
+      \item {\F{16pt}\begin{lstlisting}
+@!{\F{20pt}j\,\sffamily{} is now\ \ }@@L@!\color{jsep}\{@ "a"@!\color{jsep}:@ "value", "b1"@!\color{jsep}:@ @!\color{jsep}\{@ "b2"@!\color{jsep}:@ null @!\color{jsep}\}@ @!\color{jsep}\}@@
+        \end{lstlisting}}
+      \item {\color{orange}\faWarning}\ \ \lstinline{operator@F[]@} can turn
+        \lstinline{@Lnull@} into an \lstinline{@Lobject@}
     \end{itemize}
 \end{itemize}
 
@@ -551,10 +661,10 @@ template <typename @TValue@>
 \vspace{0em}
 
 \begin{itemize}[itemsep=0.7em]
-  \item {\itshape Implicit} cast operator
-  \item {\color{red}\faWarning}\ \ Can silently convert float to integer and vice versa
+  \item {\bfseries Implicit} cast operator
+  \item {\color{red}\faWarning}\ \ Can silently converts between numeric types
     \begin{itemize}
-      \item Can explicitly check with \lstinline{@Fis_number_integer@()} \hfill
+      \item Can explicitly check with \lstinline{@Fis_number_integer@()} etc. \hfill
         \href{https://json.nlohmann.me/features/types/number_handling/#determine-number-types}{\faFileTextO}
     \end{itemize}
   \item Implemented by calling \lstinline{@Fget@<@TValue@>()}
@@ -582,7 +692,7 @@ template <typename @TValue@>
 \vspace{0em}
 
 \begin{itemize}[itemsep=0.7em]
-  \item {\color{red}\faWarning}\ \ Can silently convert float to integer and vice versa.
+  \item {\color{red}\faWarning}\ \ Can silently converts between numeric types.
   \item Returns by value. \lstinline{@TValue@} can't be a reference type.
   \item Implementation equivalent to \vspace{-0.5em}
 \begin{tcolorbox}
@@ -655,65 +765,104 @@ template <typename @TReference@>
   \item \lstinline{@TReference@} must be a reference type.
   \item \lstinline{@TReference@} must be \lstinline{const},
     if the object is \lstinline{const}.
-  \item {\color{Green}\faThumbsUp}\ \ Throws if types don't match.
+  \item {\color{green80}\faThumbsUp}\ \ Throws if types don't match.
     No accidental conversion.
 \end{itemize}
 
-\begin{tcolorbox}
+\begin{tcolorbox}{\F{19pt}[26pt]
 \begin{lstlisting}
 @Tjson@ j;
 std::@Tstring@& str @F=@ j.@Fget_ref@<std::@Tstring@&>(str);
 \end{lstlisting}
-\end{tcolorbox}
+}\end{tcolorbox}
 
 \pagebreak
 % ------------------------------------------------------------------------------
 \slidetitle{Value access}
 
-\begin{tcolorbox}
+\begin{tcolorbox}{\F{19pt}[26pt]
 \begin{lstlisting}
 template <typename @TPointer@>
 @TPointer@ @Tbasic_json@::@Fget_ptr@() @!\itshape\color{lstKeyword}const@ noexcept; @!\hfill
   \href{https://json.nlohmann.me/api/basic_json/get_ptr/}{\faFileTextO}@
 \end{lstlisting}
-\end{tcolorbox}
+}\end{tcolorbox}
 \vspace{0em}
 
 \begin{itemize}[itemsep=0.7em]
-  \item Like \lstinline{@Fget_ref@()}, but returns \lstinline{nullptr} on failure \\
-    instead of throwing.
+  \item Like \lstinline{@Fget_ref@()}, but with pointers.
+  \item Returns \lstinline{nullptr} on failure instead of throwing.
   \item No-throw guarantee: this function never throws exceptions.
-  \item {\color{Green}\faThumbsUp}\ \ No accidental conversion.
+  \item {\color{green80}\faThumbsUp}\ \ No accidental conversion.
   \item \lstinline{@TPointer@} must be a pointer type.
   \item \lstinline{@TPointer@} must be a pointer to \lstinline{const},
     if the object is \lstinline{const}.
 \end{itemize}
 
-\begin{tcolorbox}
+\begin{tcolorbox}{\F{19pt}[26pt]
 \begin{lstlisting}
 @Tjson@ j;
 std::@Tstring@* str @F=@ j.@Fget_ptr@<std::@Tstring@*>(str);
 \end{lstlisting}
-\end{tcolorbox}
+}\end{tcolorbox}
 
 \pagebreak
 % ------------------------------------------------------------------------------
-\slidetitle{Best practice}
+\slidetitle{\faHandORight\,\ Best practice: Value access}
 
 \begin{itemize}
-  \item -
+  \item Use \lstinline{operator @TT@},
+    if you are not worried about {\bfseries copying strings}
+    or {\bfseries converting numbers}.
+  \item Use \lstinline{@Fget_ref@<@TT@>()},
+    if you are worried.
+  \item Use \lstinline{@Fget_ptr@<@TT@>()},
+    to avoid exceptions.
+  \item \lstinline{@Fget@<@TT@>()} is just a verbose version of
+    \lstinline{operator @TT@}.
+    \begin{itemize}
+      \item Can be useful in \lstinline{return} statements of functions
+        returning \lstinline{auto}.
+    \end{itemize}
 \end{itemize}
 
 \pagebreak
 % ------------------------------------------------------------------------------
-\slidetitle{Conversion to and from user types}
+\slidetitle{Conversion to and from custom types}
 
 \begin{itemize}
-  \item Specialize \lstinline{adl_serializer}
+  \item Specialize \lstinline{@Nnlohmann@::@Tadl_serializer@} \hfill
+    \href{https://json.nlohmann.me/api/adl_serializer/}{\faFileTextO}
 \end{itemize}
+\vspace{-0.2em}
+
+\begin{tcolorbox}{\F{12pt}[16pt]
+\begin{lstlisting}
+namespace @Nnlohmann@ {@!\vspace{0.4em}@
+template <typename @TT@>
+struct @Tadl_serializer@<@Nboost@::@Toptional@<@TT@>> {
+    static void @Fto_json@(@Tjson@& j, const @Nboost@::@Toptional@<@TT@>& opt) {
+        if (opt @F==@ @Nboost@::none) {
+            j @F=@ nullptr;
+        } else {
+            j @F=@ *opt;
+            // this will call adl_serializer<T>::to_json, which will
+            // find the free function to_json in T's namespace!
+        }
+    }@!\vspace{0.4em}@
+    static void @Ffrom_json@(const @Tjson@& j, @Nboost@::@Toptional@<@TT@>& opt) {
+        if (j.@Fis_null@()) {
+            opt @F=@ @Nboost@::none;
+        } else {
+            opt @F=@ j.@Fget@<@TT@>();
+            // same as above, but with adl_serializer<T>::from_json
+        }
+    }
+};@!\vspace{0.4em}@
+}
+\end{lstlisting}
+}\end{tcolorbox}
+\vspace{-1em}
 
 % ------------------------------------------------------------------------------
-% \makeatletter
-% \write\@auxout{\string\providecommand\lastpage{\thepage}}
-% \makeatother
 \end{document}

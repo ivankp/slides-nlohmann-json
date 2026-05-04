@@ -70,14 +70,15 @@ warn=0 # show warnings: 0 = on error, 1 = always
 for (( i=1, n=1; i<=n; ++i )); do
     md5_aux="$(md5 aux)"
     md5_bcf="$(md5 bcf)"
+
     # run LaTeX
     if (( i != 1 )) || NewerDEPS; then
         printf "\e[32;1m$i\e[0m\n"
         if ! "${TEX[@]}" "$NAME" > /dev/null; then
             warn=1
-            break
         fi
     fi
+
     # check if need to run multiple times
     if (( i == 1 )) && ( # update bibliography
         NewerDEPS || [ "$md5_bcf" != "$(md5 bcf)" ]
@@ -94,6 +95,7 @@ for (( i=1, n=1; i<=n; ++i )); do
         (( ++n ))
     fi
 done
+
 if (( warn != 0 )); then
     awk '''
         sub(/.*Warning:/,"\033[33m&\033[0m") || \
